@@ -38,11 +38,17 @@ return [
     */
 
     'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
+    'web' => [
+        'driver' => 'session',
+        'provider' => 'users',
     ],
+
+    // ← tambahkan ini
+    'api' => [
+        'driver' => 'jwt',
+        'provider' => 'users',
+    ],
+],
 
     /*
     |--------------------------------------------------------------------------
