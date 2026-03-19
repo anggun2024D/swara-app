@@ -3,19 +3,15 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\KategoriController;  // ← tambahkan ini
 
 // ===========================
 // ROUTES TANPA LOGIN
 // (Public Routes)
 // ===========================
 Route::prefix('auth')->group(function () {
-
-    // POST /api/auth/register
     Route::post('/register', [AuthController::class, 'register']);
-
-    // POST /api/auth/login
-    Route::post('/login', [AuthController::class, 'login']);
-
+    Route::post('/login',    [AuthController::class, 'login']);
 });
 
 // ===========================
@@ -25,30 +21,22 @@ Route::prefix('auth')->group(function () {
 Route::middleware('auth:api')->group(function () {
 
     // --- AUTH ---
-    // POST   /api/auth/logout
-    Route::post('/auth/logout', [AuthController::class, 'logout']);
-
-    // GET    /api/auth/profile
-    Route::get('/auth/profile', [AuthController::class, 'profile']);
-
-    // DELETE /api/auth/delete-account
-    Route::delete('/auth/delete-account', [AuthController::class, 'deleteAccount']);
+    Route::post('/auth/logout',         [AuthController::class, 'logout']);
+    Route::get('/auth/profile',         [AuthController::class, 'profile']);
+    Route::delete('/auth/delete-account',[AuthController::class, 'deleteAccount']);
 
     // --- LAPORAN ---
     Route::prefix('laporan')->group(function () {
-
-        // GET  /api/laporan
-        Route::get('/', [ReportController::class, 'index']);
-
-        // POST /api/laporan
-        Route::post('/', [ReportController::class, 'store']);
-
-        // GET  /api/laporan/riwayat
+        Route::get('/',        [ReportController::class, 'index']);
+        Route::post('/',       [ReportController::class, 'store']);
         Route::get('/riwayat', [ReportController::class, 'riwayat']);
+        Route::get('/{id}',    [ReportController::class, 'show']);
+    });
 
-        // GET  /api/laporan/{id}
-        Route::get('/{id}', [ReportController::class, 'show']);
-
-    }); // ← tutup prefix laporan
+    // --- KATEGORI ---          ← tambahkan ini
+    Route::prefix('kategori')->group(function () {
+        Route::get('/',      [KategoriController::class, 'index']);
+        Route::get('/{id}',  [KategoriController::class, 'show']);
+    });
 
 });
