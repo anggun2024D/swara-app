@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Notification extends Model
 {
-    protected $table = 'notifications';
-
+    // Tabel ini tidak pakai updated_at
     public $timestamps = false;
+
+    protected $table = 'notifications';
 
     protected $fillable = [
         'user_id',
@@ -19,14 +20,21 @@ class Notification extends Model
         'is_read',
     ];
 
-    // === RELASI ===
-    // Notifikasi ini untuk satu user
+    protected function casts(): array
+    {
+        return [
+            'is_read'    => 'boolean',
+            'created_at' => 'datetime',
+        ];
+    }
+
+    // Notifikasi dimiliki oleh 1 user
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Notifikasi ini terkait satu laporan
+    // Notifikasi terkait dengan 1 laporan
     public function report()
     {
         return $this->belongsTo(Report::class, 'report_id');
