@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\KategoriController;
-use App\Http\Controllers\NotifikasiController;  // ← tambahkan
+use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\ProfilController;  // ← tambahkan
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
@@ -35,30 +36,43 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/{id}', [KategoriController::class, 'show']);
     });
 
-    // --- NOTIFIKASI ---          ← tambahkan ini
+    // --- NOTIFIKASI ---
     Route::prefix('notifikasi')->group(function () {
-
-        // GET    /api/notifikasi
         Route::get('/',
             [NotifikasiController::class, 'index']);
-
-        // PUT    /api/notifikasi/read-all
-        // ⚠️ Harus di atas /{id} agar tidak bentrok!
         Route::put('/read-all',
             [NotifikasiController::class, 'markAllAsRead']);
-
-        // GET    /api/notifikasi/{id}
         Route::get('/{id}',
             [NotifikasiController::class, 'show']);
-
-        // PUT    /api/notifikasi/{id}/read
         Route::put('/{id}/read',
             [NotifikasiController::class, 'markAsRead']);
-
-        // DELETE /api/notifikasi/{id}
         Route::delete('/{id}',
             [NotifikasiController::class, 'destroy']);
+    });
+
+    // --- PROFIL ---          ← tambahkan ini
+    Route::prefix('profil')->group(function () {
+
+        // GET  /api/profil
+        Route::get('/',
+            [ProfilController::class, 'index']);
+
+        // PUT  /api/profil
+        Route::put('/',
+            [ProfilController::class, 'update']);
+
+        // POST /api/profil/foto
+        Route::post('/foto',
+            [ProfilController::class, 'updateFoto']);
+
+        // PUT  /api/profil/password
+        Route::put('/password',
+            [ProfilController::class, 'updatePassword']);
+
+        // PUT  /api/profil/preferensi
+        Route::put('/preferensi',
+            [ProfilController::class, 'updatePreferensi']);
 
     });
 
-}); // ← tutup middleware auth:api
+});
