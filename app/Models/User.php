@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;                        // ← pastikan ada ini!
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
+    // ← Wajib ada! Beritahu Laravel pakai UUID
     protected $keyType = 'string';
     public $incrementing = false;
 
@@ -40,9 +42,18 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
-    // =============================================
-    // WAJIB UNTUK JWT
-    // =============================================
+    // ← Wajib ada! Generate UUID otomatis
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                $model->id = Str::uuid()->toString();
+            }
+        });
+    }
+
+    // JWT Methods
     public function getJWTIdentifier()
     {
         return $this->getKey();
@@ -53,9 +64,7 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    // =============================================
-    // RELASI
-    // =============================================
+    // Relasi
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id');
@@ -74,5 +83,10 @@ class User extends Authenticatable implements JWTSubject
     public function notifications()
     {
         return $this->hasMany(Notification::class, 'user_id');
+    }
+
+    public function getAuthPassword()
+    {
+        return $this->password_hash;
     }
 }

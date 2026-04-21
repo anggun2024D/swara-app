@@ -34,6 +34,13 @@ class AuthController extends Controller
 
         $role = Role::where('name', 'user')->first();
 
+        if (!$role) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Role user tidak ditemukan',
+            ], 500);
+        }
+
         $user = User::create([
             'role_id'       => $role->id,
             'nama'          => $request->nama,
@@ -100,12 +107,12 @@ class AuthController extends Controller
             ], 500);
         }
 
-        $user->sessions()->create([
-            'device_info'   => $request->header('User-Agent'),
-            'ip_address'    => $request->ip(),
-            'last_activity' => now(),
-            'expired_at'    => now()->addDays(1),
-        ]);
+        // $user->sessions()->create([
+        //     'device_info'   => $request->header('User-Agent'),
+        //     'ip_address'    => $request->ip(),
+        //     'last_activity' => now(),
+        //     'expired_at'    => now()->addDays(1),
+        // ]);
 
         return response()->json([
             'status'  => 'success',
@@ -117,6 +124,22 @@ class AuthController extends Controller
                     'nama'  => $user->nama,
                     'email' => $user->email,
                     'role'  => $user->role->name,
+                ]
+            ]
+        ], 200);
+
+        $user->load('role');
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Login berhasil',
+            'data'    => [
+                'token' => $token,
+                'user'  => [
+                    'id'    => $user->id,
+                    'nama'  => $user->nama,
+                    'email' => $user->email,
+                    'role'  => $user->role ? $user->role->name : 'no-role', // Tambahkan null check
                 ]
             ]
         ], 200);

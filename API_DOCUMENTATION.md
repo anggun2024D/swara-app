@@ -33,37 +33,62 @@ Token expired setelah **1 hari (1440 menit)**.
 
 ## 📋 Format Response
 
-### Response Sukses
+Struktur umum untuk balikan (response) dari API SWARA.
+
+### 1. Response Sukses (Data Object / Array)
+```json
+{
+    "success": true,
+    "message": "Pesan sukses operasional",
+    "data": {
+        // Objek data atau array list data terkait
+    }
+}
+```
+
+### 2. Response Sukses (Dengan Pagination)
+Untuk data list yang memiliki halaman (pagination) seperti pada daftar laporan:
 ```json
 {
     "success": true,
     "message": "Pesan sukses",
-    "data": { }
+    "data": {
+        "nama_list": [ /* array of objects */ ],
+        "pagination": {
+            "total": 10,
+            "per_halaman": 10,
+            "halaman_ini": 1,
+            "total_halaman": 1
+        }
+    }
 }
 ```
 
-### Response Error
+### 3. Response Error (400, 401, 403, 404, 500)
 ```json
 {
     "success": false,
-    "message": "Pesan error",
+    "message": "Pesan error penjelasan penyebab gagal",
     "data": null
 }
 ```
 
-### Response Validasi Error
+### 4. Response Validasi Error (422)
+Gagal saat input form tidak sesuai aturan (rule):
 ```json
 {
     "success": false,
     "message": "Validasi gagal",
     "errors": {
-        "nama_field": ["pesan error"]
+        "nama_field": [
+            "pesan error 1 untuk field ini",
+            "pesan error 2 jika ada"
+        ]
     }
 }
 ```
 
-> ⚠️ Khusus endpoint Auth menggunakan
-> "status" bukan "success"
+> ⚠️ **Pengecualian Endpoint Auth:** Khusus endpoint otentikasi (Auth) saat ini menggunakan key `"status": "success"` / `"status": "error"` (bertipe `string`) dan bukan `"success": true|false` (bertipe `boolean`).
 
 ---
 
