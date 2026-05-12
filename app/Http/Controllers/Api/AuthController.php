@@ -61,6 +61,85 @@ class AuthController extends Controller
         ], 201);
     }
 
+    public function googleLogin(Request $request)
+    {
+        $request->validate(['id_token' => 'required|string']);
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::get(
+                'https://oauth2.googleapis.com/tokeninfo',
+                ['id_token' => $request->id_token]
+            );
+
+            if ($response->failed()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Token Google tidak valid',
+                ], 401);
+            }
+
+            $googleData = $response->json();
+
+            $email = $googleData['email']   ?? null;
+            $name  = $googleData['name']    ?? 'Pengguna';
+            $foto  = $googleData['picture'] ?? null;
+            $uid   = $googleData['sub']     ?? null;
+
+            if (!$email || !$uid) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Data Google tidak lengkap',
+                ], 400);
+            }
+
+            // Ambil role user
+            $role = \App\Models\Role::where('name', 'user')->first();
+            if (!$role) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Role tidak ditemukan',
+                ], 500);
+            }
+
+            $user = \App\Models\User::firstOrCreate(
+                ['email' => $email],
+                [
+                    'role_id'       => $role->id,
+                    'nama'          => $name,
+                    'google_id'     => $uid,
+                    'foto'          => $foto,
+                    'password_hash' => bcrypt(\Illuminate\Support\Str::random(16)),
+                ]
+            );
+
+            if (!$user->google_id) {
+                $user->update(['google_id' => $uid]);
+            }
+
+            $token = \Tymon\JWTAuth\Facades\JWTAuth::fromUser($user);
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Login berhasil',
+                'data'    => [
+                    'token' => $token,
+                    'user'  => [
+                        'id'    => $user->id,
+                        'nama'  => $user->nama,
+                        'email' => $user->email,
+                        'foto'  => $user->foto,
+                    ],
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     // ===========================
     // LOGIN
     // ===========================

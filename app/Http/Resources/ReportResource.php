@@ -19,7 +19,7 @@ class ReportResource extends JsonResource
                 'longitude' => $this->longitude,
                 'address'   => $this->address,
             ],
-            'kategori' => [
+            'category' => [
                 'id'        => $this->category->id,
                 'nama'      => $this->category->name,
             ],

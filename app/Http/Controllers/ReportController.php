@@ -169,6 +169,7 @@ class ReportController extends Controller
     public function riwayat(Request $request)
     {
         $query = Report::with(['category', 'images'])
+                        ->withTrashed()
                        ->where('user_id', Auth::id())
                        ->latest();
 
@@ -200,4 +201,116 @@ class ReportController extends Controller
             ]
         );
     }
+
+    // ================================
+// 5. EDIT LAPORAN
+// POST /api/laporan/{id}?_method=PUT
+// ================================
+public function update(Request $request, string $id)
+{
+    DB::beginTransaction();
+    try {
+        $report = Report::with(['user', 'category', 'images'])
+                        ->find($id);
+
+        if (!$report) {
+            return $this->response(false, 'Laporan tidak ditemukan', null, 404);
+        }
+
+        // Hanya pelapor sendiri yang boleh edit
+        if ($report->user_id !== Auth::id()) {
+            return $this->response(false, 'Tidak diizinkan mengedit laporan ini', null, 403);
+        }
+
+        // Hanya laporan dengan status 'tersubmit' yang boleh diedit
+        if ($report->status !== 'tersubmit') {
+            return $this->response(false, 'Laporan yang sudah diproses tidak dapat diedit', null, 422);
+        }
+
+        // Update field utama
+        $report->update([
+            'category_id' => $request->category_id ?? $report->category_id,
+            'judul'       => $request->judul       ?? $report->judul,
+            'deskripsi'   => $request->deskripsi   ?? $report->deskripsi,
+            'latitude'    => $request->latitude     ?? $report->latitude,
+            'longitude'   => $request->longitude    ?? $report->longitude,
+            'address'     => $request->address      ?? $report->address,
+        ]);
+
+        // ── Kelola foto lama ──────────────────────────────
+        // existing_photos[] berisi URL foto yang DIPERTAHANKAN user
+        $existingUrls = $request->input('existing_photos', []);
+
+        // Ambil semua foto laporan ini dari DB
+        $allImages = ReportImage::where('report_id', $report->id)->get();
+
+        foreach ($allImages as $image) {
+            // Buat full URL untuk dibandingkan dengan yang dikirim Flutter
+            $fullUrl = asset('storage/' . $image->image_url);
+
+            // Jika URL foto ini tidak ada di existing_photos → hapus
+            if (!in_array($fullUrl, $existingUrls) && !in_array($image->image_url, $existingUrls)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($image->image_url);
+                $image->delete();
+            }
+        }
+
+        // ── Tambah foto baru ──────────────────────────────
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('reports', 'public');
+                ReportImage::create([
+                    'report_id' => $report->id,
+                    'image_url' => $path,
+                ]);
+            }
+        }
+
+        DB::commit();
+        $report->load(['user', 'category', 'images']);
+
+        return $this->response(
+            true,
+            'Laporan berhasil diperbarui',
+            new ReportResource($report)
+        );
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return $this->response(false, 'Laporan gagal diperbarui: ' . $e->getMessage(), null, 500);
+    }
+}
+
+    // ================================
+    // 6. HAPUS LAPORAN
+    // DELETE /api/laporan/{id}
+    // ================================
+    public function destroy(string $id)
+{
+    DB::beginTransaction();
+    try {
+        $report = Report::find($id); // tanpa withTrashed
+
+        if (!$report) {
+            return $this->response(false, 'Laporan tidak ditemukan', null, 404);
+        }
+
+        if ($report->user_id !== Auth::id()) {
+            return $this->response(false, 'Tidak diizinkan menghapus laporan ini', null, 403);
+        }
+
+        // 1. Ubah status ke 'ditolak' sebelum soft delete
+        $report->update(['status' => 'ditolak']);
+
+        // 2. Soft delete (isi deleted_at)
+        $report->delete();
+
+        DB::commit();
+        return $this->response(true, 'Laporan berhasil dibatalkan');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return $this->response(false, 'Gagal membatalkan: ' . $e->getMessage(), null, 500);
+    }
+}
 }

@@ -68,20 +68,22 @@ class ProfilController extends Controller
     public function update(UpdateProfilRequest $request)
     {
         /** @var User $user */
-        $user = Auth::user();
+            $user = Auth::user();
 
-        $user->update([
-            'nama'  => $request->nama,
-            'email' => $request->email,
+        $validated = $request->validate([
+            'nama'    => 'sometimes|string|max:255',
+            'email'   => 'sometimes|email|unique:users,email,' . $user->id,
+            'no_telp' => 'nullable|string|max:20',
+            'alamat'  => 'nullable|string',
         ]);
 
-        $user->load('role');
+        $user->update($validated);
 
-        return $this->response(
-            true,
-            'Profil berhasil diperbarui',
-            $this->formatUser($user)
-        );
+        return response()->json([
+            'success' => true,
+            'message' => 'Profil berhasil diperbarui',
+            'data'    => $user,
+        ]);
     }
 
     // ================================

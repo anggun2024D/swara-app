@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
         // 1. Jalankan RoleSeeder yang sudah kamu buat
         $this->call([
             RoleSeeder::class,
+            ReportCategorySeeder::class,
+            NotificationSeeder::class,
         ]);
 
         // User::factory()->create([

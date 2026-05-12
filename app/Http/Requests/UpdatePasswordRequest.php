@@ -22,7 +22,7 @@ class UpdatePasswordRequest extends FormRequest
             'password_baru' => 'required|string|min:8|confirmed',
 
             // Konfirmasi password baru
-            'password_baru_confirmation' => 'required|string',
+            'password_baru_confirmation' => 'required|same:password_baru',
         ];
     }
 

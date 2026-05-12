@@ -12,7 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // Tambahkan ini agar unauthenticated request return JSON, bukan redirect
+        $middleware->redirectGuestsTo(fn() => null);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
