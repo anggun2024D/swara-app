@@ -50,10 +50,14 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
-        "post-autoload-dump": [
-            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
-        ],
+         "post-autoload-dump": [
+        "Illuminate\\Scaffolding\\ComposerScripts::postAutoloadDump",
+        "@php artisan package:discover --ansi"
+    ],
+    "post-install-cmd": [
+        "@php artisan migrate --force --no-interaction",
+        "@php artisan db:seed --force --no-interaction"
+    ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
