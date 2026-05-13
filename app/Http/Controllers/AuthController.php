@@ -156,7 +156,9 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status'  => 'error',
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'message' => $e->getMessage(), // sudah ada
+                'file'    => $e->getFile(),    // tambah ini
+                'line'    => $e->getLine(),    // tambah ini
             ], 500);
         }
     }
