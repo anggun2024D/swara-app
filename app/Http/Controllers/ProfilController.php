@@ -8,7 +8,8 @@ use App\Http\Requests\UpdatePasswordRequest;
 use App\Models\User;                           // ← tambahkan ini
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
+use Cloudinary\Cloudinary;
+use Cloudinary\Configuration\Configuration;
 
 class ProfilController extends Controller
 {
@@ -33,9 +34,7 @@ class ProfilController extends Controller
             'id'                    => $user->id,
             'nama'                  => $user->nama,
             'email'                 => $user->email,
-            'foto_url'              => $user->foto_url
-                                        ? asset('storage/' . $user->foto_url)
-                                        : null,
+            'foto_url'              => $user->foto_url ?? null,
             'dark_mode'             => $user->dark_mode,
             'notifications_enabled' => $user->notifications_enabled,
             'role'                  => $user->role->name,
@@ -96,11 +95,21 @@ class ProfilController extends Controller
         $user = Auth::user();
 
         // Simpan foto baru
-        $uploaded = cloudinary()->upload(
+        $cloudinary = new Cloudinary(
+            Configuration::instance([
+                'cloud' => [
+                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                    'api_key'    => env('CLOUDINARY_API_KEY'),
+                    'api_secret' => env('CLOUDINARY_API_SECRET'),
+                ],
+                'url' => ['secure' => true],
+            ])
+        );
+        $result = $cloudinary->uploadApi()->upload(
             $request->file('foto')->getRealPath(),
             ['folder' => 'swara/profiles']
         );
-        $user->update(['foto_url' => $uploaded->getSecurePath()]);
+        $user->update(['foto_url' => $result['secure_url']]);
 
         $user->load('role');
 

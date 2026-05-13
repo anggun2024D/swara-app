@@ -9,6 +9,8 @@ use App\Models\ReportImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Cloudinary\Cloudinary;
+use Cloudinary\Configuration\Configuration;
 
 class ReportController extends Controller
 {
@@ -47,12 +49,24 @@ class ReportController extends Controller
 
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    $uploaded = cloudinary()->upload($image->getRealPath(), [
-                        'folder' => 'swara/reports'
-                    ]);
+                    // Simpan foto baru
+                    $cloudinary = new Cloudinary(
+                        Configuration::instance([
+                            'cloud' => [
+                                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                                'api_key'    => env('CLOUDINARY_API_KEY'),
+                                'api_secret' => env('CLOUDINARY_API_SECRET'),
+                            ],
+                            'url' => ['secure' => true],
+                        ])
+                    );
+                    $result = $cloudinary->uploadApi()->upload(
+                        $image->getRealPath(),
+                        ['folder' => 'swara/reports']
+                    );
                     ReportImage::create([
                         'report_id' => $report->id,
-                        'image_url' => $uploaded->getSecurePath(),
+                        'image_url' => $result['secure_url'],
                     ]);
                 }
             }
@@ -260,12 +274,24 @@ public function update(Request $request, string $id)
         // ── Tambah foto baru ──────────────────────────────
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $uploaded = cloudinary()->upload($image->getRealPath(), [
-                    'folder' => 'swara/reports'
-                ]);
+                // Simpan foto baru
+                $cloudinary = new Cloudinary(
+                    Configuration::instance([
+                        'cloud' => [
+                            'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                            'api_key'    => env('CLOUDINARY_API_KEY'),
+                            'api_secret' => env('CLOUDINARY_API_SECRET'),
+                        ],
+                        'url' => ['secure' => true],
+                    ])
+                );
+                $result = $cloudinary->uploadApi()->upload(
+                    $image->getRealPath(),
+                    ['folder' => 'swara/reports']
+                );
                 ReportImage::create([
                     'report_id' => $report->id,
-                    'image_url' => $uploaded->getSecurePath(),
+                    'image_url' => $result['secure_url'],
                 ]);
             }
         }
