@@ -108,6 +108,7 @@ ke WiFi yang **sama**!
 | TECHNICAL_NOTES.md | Catatan teknis untuk frontend |
 
 ---
+allen
 
 ## 🧪 Testing API
 
