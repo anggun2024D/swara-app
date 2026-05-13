@@ -28,6 +28,8 @@ Route::prefix('kategori')->group(function () {
 // ============================================================
 
 Route::middleware('auth:api')->group(function () {
+    
+    Route::post('/fcm-token', [App\Http\Controllers\FCMTokenController::class, 'update']);
 
     // --- AUTH ---
     Route::prefix('auth')->group(function () {
