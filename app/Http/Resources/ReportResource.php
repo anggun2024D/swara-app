@@ -30,7 +30,7 @@ class ReportResource extends JsonResource
             'foto' => $this->images->map(function ($image) {
                 return [
                     'id'    => $image->id,
-                    'url'   => asset('storage/' . $image->image_url),
+                    'url' => $image->image_url,
                 ];
             }),
             'dibuat_pada'   => $this->created_at
