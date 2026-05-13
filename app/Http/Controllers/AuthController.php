@@ -84,82 +84,31 @@ class AuthController extends Controller
 
     // ─── GOOGLE LOGIN (tanpa kreait/laravel-firebase) ─────────────
     public function googleLogin(Request $request)
-    {
-        $request->validate(['id_token' => 'required|string']);
+{
+    $request->validate(['id_token' => 'required|string']);
 
-        try {
-            // Verifikasi token langsung ke Google API — tidak butuh SDK apapun
-            $response = \Illuminate\Support\Facades\Http::get(
-                'https://oauth2.googleapis.com/tokeninfo',
-                ['id_token' => $request->id_token]
-            );
+    try {
+        $response = \Illuminate\Support\Facades\Http::get(
+            'https://oauth2.googleapis.com/tokeninfo',
+            ['id_token' => $request->id_token]
+        );
 
-            if ($response->failed()) {
-                return response()->json([
-                    'status'  => 'error',
-                    'message' => 'Token Google tidak valid',
-                ], 401);
-            }
+        $googleData = $response->json();
 
-            $googleData = $response->json();
+        // Langsung return data untuk debug
+        return response()->json([
+            'status'      => 'debug',
+            'google_data' => $googleData,
+            'response_status' => $response->status(),
+        ]);
 
-            // Pastikan token untuk project Firebase kamu
-            $allowedAudiences = [
-                '1020702878705-xxxxxxxx.apps.googleusercontent.com', // ganti dengan client_id kamu
-            ];
-
-            // Ambil data user dari Google
-            $email = $googleData['email']       ?? null;
-            $name  = $googleData['name']        ?? 'Pengguna';
-            $foto  = $googleData['picture']     ?? null;
-            $uid   = $googleData['sub']         ?? null;
-
-            if (!$email || !$uid) {
-                return response()->json([
-                    'status'  => 'error',
-                    'message' => 'Data Google tidak lengkap',
-                ], 400);
-            }
-
-            // Cari atau buat user
-            $user = User::firstOrCreate(
-                ['email' => $email],
-                [
-                    'nama'      => $name,
-                    'google_id' => $uid,
-                    'foto'      => $foto,
-                    'password'  => bcrypt(\Illuminate\Support\Str::random(16)),
-                ]
-            );
-
-            // Update google_id kalau user sudah ada tapi belum punya
-            if (!$user->google_id) {
-                $user->update(['google_id' => $uid]);
-            }
-
-            $token = \Tymon\JWTAuth\Facades\JWTAuth::fromUser($user);
-
-            return response()->json([
-                'status'  => 'success',
-                'message' => 'Login berhasil',
-                'data'    => [
-                    'token' => $token,
-                    'user'  => [
-                        'id'    => $user->id,
-                        'nama'  => $user->nama,
-                        'email' => $user->email,
-                        'foto'  => $user->foto,
-                    ],
-                ],
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => $e->getMessage(), // sudah ada
-                'file'    => $e->getFile(),    // tambah ini
-                'line'    => $e->getLine(),    // tambah ini
-            ], 500);
-        }
+    } catch (\Exception $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => $e->getMessage(),
+            'file'    => $e->getFile(),
+            'line'    => $e->getLine(),
+        ], 500);
     }
+}
 }
