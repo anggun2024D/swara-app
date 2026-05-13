@@ -95,17 +95,12 @@ class ProfilController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        // Hapus foto lama kalau ada
-        if ($user->foto_url) {
-            Storage::disk('public')->delete($user->foto_url);
-        }
-
         // Simpan foto baru
-        $path = $request->file('foto')
-                        ->store('profiles', 'public');
-
-        // Update path foto di database
-        $user->update(['foto_url' => $path]);
+        $uploaded = cloudinary()->upload(
+            $request->file('foto')->getRealPath(),
+            ['folder' => 'swara/profiles']
+        );
+        $user->update(['foto_url' => $uploaded->getSecurePath()]);
 
         $user->load('role');
 

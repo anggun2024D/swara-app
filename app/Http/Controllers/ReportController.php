@@ -47,10 +47,12 @@ class ReportController extends Controller
 
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    $path = $image->store('reports', 'public');
+                    $uploaded = cloudinary()->upload($image->getRealPath(), [
+                        'folder' => 'swara/reports'
+                    ]);
                     ReportImage::create([
                         'report_id' => $report->id,
-                        'image_url' => $path,
+                        'image_url' => $uploaded->getSecurePath(),
                     ]);
                 }
             }
@@ -258,10 +260,12 @@ public function update(Request $request, string $id)
         // ── Tambah foto baru ──────────────────────────────
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store('reports', 'public');
+                $uploaded = cloudinary()->upload($image->getRealPath(), [
+                    'folder' => 'swara/reports'
+                ]);
                 ReportImage::create([
                     'report_id' => $report->id,
-                    'image_url' => $path,
+                    'image_url' => $uploaded->getSecurePath(),
                 ]);
             }
         }
