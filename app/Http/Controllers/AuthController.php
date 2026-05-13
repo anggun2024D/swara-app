@@ -84,31 +84,31 @@ class AuthController extends Controller
 
     // ─── GOOGLE LOGIN (tanpa kreait/laravel-firebase) ─────────────
     public function googleLogin(Request $request)
-{
-    $request->validate(['id_token' => 'required|string']);
+    {
+        // $request->validate(['id_token' => 'required|string']);
 
-    try {
-        $response = \Illuminate\Support\Facades\Http::get(
-            'https://oauth2.googleapis.com/tokeninfo',
-            ['id_token' => $request->id_token]
-        );
+        try {
+            $response = \Illuminate\Support\Facades\Http::get(
+                'https://oauth2.googleapis.com/tokeninfo',
+                ['id_token' => $request->id_token]
+            );
 
-        $googleData = $response->json();
+            $googleData = $response->json();
 
-        // Langsung return data untuk debug
-        return response()->json([
-            'status'      => 'debug',
-            'google_data' => $googleData,
-            'response_status' => $response->status(),
-        ]);
+            // Langsung return data untuk debug
+            return response()->json([
+                'status'      => 'debug',
+                'google_data' => $googleData,
+                'response_status' => $response->status(),
+            ]);
 
-    } catch (\Exception $e) {
-        return response()->json([
-            'status'  => 'error',
-            'message' => $e->getMessage(),
-            'file'    => $e->getFile(),
-            'line'    => $e->getLine(),
-        ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+            ], 500);
+        }
     }
-}
 }
