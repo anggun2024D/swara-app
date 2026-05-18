@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\FCMService;
+use App\Models\User;
 use App\Http\Requests\StoreReportRequest;
 use App\Http\Resources\ReportResource;
 use App\Models\Report;
@@ -33,64 +35,99 @@ class ReportController extends Controller
     // POST /api/laporan
     // ================================
     public function store(StoreReportRequest $request)
-    {
-        DB::beginTransaction();
-        try {
-            $report = Report::create([
-                'user_id'     => Auth::id(),
-                'category_id' => $request->category_id,
-                'judul'       => $request->judul,
-                'deskripsi'   => $request->deskripsi,
-                'latitude'    => $request->latitude,
-                'longitude'   => $request->longitude,
-                'address'     => $request->address,
-                'status'      => 'tersubmit',
-            ]);
+{
+    DB::beginTransaction();
+    try {
+        $report = Report::create([
+            'user_id'     => Auth::id(),
+            'category_id' => $request->category_id,
+            'judul'       => $request->judul,
+            'deskripsi'   => $request->deskripsi,
+            'latitude'    => $request->latitude,
+            'longitude'   => $request->longitude,
+            'address'     => $request->address,
+            'status'      => 'tersubmit',
+        ]);
 
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    // Simpan foto baru
-                    $cloudinary = new Cloudinary(
-                        Configuration::instance([
-                            'cloud' => [
-                                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-                                'api_key'    => env('CLOUDINARY_API_KEY'),
-                                'api_secret' => env('CLOUDINARY_API_SECRET'),
-                            ],
-                            'url' => ['secure' => true],
-                        ])
-                    );
-                    $result = $cloudinary->uploadApi()->upload(
-                        $image->getRealPath(),
-                        ['folder' => 'swara/reports']
-                    );
-                    ReportImage::create([
-                        'report_id' => $report->id,
-                        'image_url' => $result['secure_url'],
-                    ]);
-                }
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $cloudinary = new Cloudinary(
+                    Configuration::instance([
+                        'cloud' => [
+                            'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                            'api_key'    => env('CLOUDINARY_API_KEY'),
+                            'api_secret' => env('CLOUDINARY_API_SECRET'),
+                        ],
+                        'url' => ['secure' => true],
+                    ])
+                );
+                $result = $cloudinary->uploadApi()->upload(
+                    $image->getRealPath(),
+                    ['folder' => 'swara/reports']
+                );
+                ReportImage::create([
+                    'report_id' => $report->id,
+                    'image_url' => $result['secure_url'],
+                ]);
             }
+        }
 
-            DB::commit();
-            $report->load(['user', 'category', 'images']);
+        DB::commit();
+        $report->load(['user', 'category', 'images']);
 
-            return $this->response(
-                true,
-                'Laporan berhasil dikirim',
-                new ReportResource($report),
-                201
-            );
+        // ── NOTIFIKASI ──────────────────────────────────────
+        $fcm = new FCMService();
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->response(
-                false,
-                'Laporan gagal dikirim',
-                null,
-                500
+        // 1. Notif ke PEMBUAT LAPORAN — konfirmasi laporan diterima
+        $pembuat = Auth::user();
+        if ($pembuat->fcm_token) {
+            $fcm->sendToToken(
+                token: $pembuat->fcm_token,
+                title: '✅ Laporan Berhasil Dikirim',
+                body:  "Laporan \"{$report->judul}\" kamu sudah kami terima dan sedang diproses.",
+                data:  [
+                    'type'      => 'laporan_dibuat',
+                    'report_id' => (string) $report->id,
+                ]
             );
         }
+
+        // 2. Broadcast ke SEMUA USER LAIN — ada laporan baru
+        $tokens = User::where('id', '!=', Auth::id())
+            ->whereNotNull('fcm_token')
+            ->pluck('fcm_token')
+            ->toArray();
+
+        if (!empty($tokens)) {
+            $fcm->sendToMultiple(
+                tokens: $tokens,
+                title:  '📢 Laporan Baru',
+                body:   "{$pembuat->nama} membuat laporan baru: \"{$report->judul}\"",
+                data:   [
+                    'type'      => 'laporan_baru',
+                    'report_id' => (string) $report->id,
+                ]
+            );
+        }
+        // ────────────────────────────────────────────────────
+
+        return $this->response(
+            true,
+            'Laporan berhasil dikirim',
+            new ReportResource($report),
+            201
+        );
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return $this->response(
+            false,
+            'Laporan gagal dikirim',
+            null,
+            500
+        );
     }
+}
 
     // ================================
     // 2. LIHAT DAFTAR LAPORAN

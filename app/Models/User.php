@@ -25,6 +25,7 @@ class User extends Authenticatable implements JWTSubject
         'no_telp',
         'alamat',
         'foto',
+        'fcm_token',
         'dark_mode',
         'notifications_enabled',
         'is_active',

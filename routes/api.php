@@ -6,6 +6,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\ProfilController;
+use App\Http\Controllers\FCMTokenController;
 
 // ============================================================
 // PUBLIC ROUTES — Tidak perlu token
@@ -15,6 +16,8 @@ Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login',    [AuthController::class, 'login']);
     Route::post('/google', [AuthController::class, 'googleLogin']);
+    Route::post('/fcm-token',    [FCMTokenController::class, 'store']);
+    Route::delete('/fcm-token',  [FCMTokenController::class, 'destroy']);
 });
 
 // Kategori publik — dibutuhkan di Home Screen sebelum login
@@ -28,7 +31,7 @@ Route::prefix('kategori')->group(function () {
 // ============================================================
 
 Route::middleware('auth:api')->group(function () {
-    
+
     Route::post('/fcm-token', [App\Http\Controllers\FCMTokenController::class, 'update']);
 
     // --- AUTH ---
