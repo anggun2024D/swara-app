@@ -73,26 +73,42 @@ class ReportController extends Controller
         }
 
         DB::commit();
-$report->load(['user', 'category', 'images']);
+        $report->load(['user', 'category', 'images']);
 
-// ── NOTIFIKASI — jangan crash kalau FCM gagal ──
-try {
-    $fcm = new FCMService();
-    $pembuat = Auth::user();
-    if ($pembuat->fcm_token) {
-        $fcm->sendToToken(
-            token: $pembuat->fcm_token,
-            title: '✅ Laporan Berhasil Dikirim',
-            body:  "Laporan \"{$report->judul}\" kamu sudah kami terima.",
-            data:  ['type' => 'laporan_dibuat', 'report_id' => (string) $report->id]
-        );
-    }
-} catch (\Exception $fcmError) {
-    \Log::warning('FCM gagal: ' . $fcmError->getMessage());
-    // Tidak return error — laporan tetap berhasil
-}
+        // ── NOTIFIKASI ──────────────────────────────────────
+        $fcm = new FCMService();
 
-return $this->response(true, 'Laporan berhasil dikirim', new ReportResource($report), 201);
+        // 1. Notif ke PEMBUAT LAPORAN — konfirmasi laporan diterima
+        $pembuat = Auth::user();
+        if ($pembuat->fcm_token) {
+            $fcm->sendToToken(
+                token: $pembuat->fcm_token,
+                title: '✅ Laporan Berhasil Dikirim',
+                body:  "Laporan \"{$report->judul}\" kamu sudah kami terima dan sedang diproses.",
+                data:  [
+                    'type'      => 'laporan_dibuat',
+                    'report_id' => (string) $report->id,
+                ]
+            );
+        }
+
+        // 2. Broadcast ke SEMUA USER LAIN — ada laporan baru
+        $tokens = User::where('id', '!=', Auth::id())
+            ->whereNotNull('fcm_token')
+            ->pluck('fcm_token')
+            ->toArray();
+
+        if (!empty($tokens)) {
+            $fcm->sendToMultiple(
+                tokens: $tokens,
+                title:  '📢 Laporan Baru',
+                body:   "{$pembuat->nama} membuat laporan baru: \"{$report->judul}\"",
+                data:   [
+                    'type'      => 'laporan_baru',
+                    'report_id' => (string) $report->id,
+                ]
+            );
+        }
         // ────────────────────────────────────────────────────
 
         return $this->response(

@@ -9,12 +9,10 @@ use Google\Auth\Credentials\ServiceAccountCredentials;
 class FCMService
 {
     private string $projectId;
-    private string $credentialsPath;
 
     public function __construct()
     {
-        $this->projectId       = config('services.firebase.project_id');
-        $this->credentialsPath = config('services.firebase.credentials_path');
+        $this->projectId = env('FIREBASE_PROJECT_ID');
     }
 
     // ================================
@@ -94,12 +92,14 @@ class FCMService
     // ================================
     private function getAccessToken(): string
     {
+        // Baca dari environment variable, bukan file
+        $credentialsJson = env('FIREBASE_CREDENTIALS_JSON');
         $credentials = new ServiceAccountCredentials(
             'https://www.googleapis.com/auth/firebase.messaging',
-            json_decode(file_get_contents($this->credentialsPath), true)
+            json_decode($credentialsJson, true)
         );
 
         $token = $credentials->fetchAuthToken();
-        return $token['access_token'];
+        return $token['access_url'];
     }
 }
