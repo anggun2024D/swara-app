@@ -34,7 +34,7 @@ class ProfilController extends Controller
             'id'                    => $user->id,
             'nama'                  => $user->nama,
             'email'                 => $user->email,
-            'foto_url'              => $user->foto_url ?? null,
+            'foto_url'              => $user->foto ?? null,
             'dark_mode'             => $user->dark_mode,
             'notifications_enabled' => $user->notifications_enabled,
             'role'                  => $user->role->name,
@@ -109,7 +109,7 @@ class ProfilController extends Controller
             $request->file('foto')->getRealPath(),
             ['folder' => 'swara/profiles']
         );
-        $user->update(['foto_url' => $result['secure_url']]);
+        $user->update(['foto' => $result['secure_url']]);
 
         $user->load('role');
 
