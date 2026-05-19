@@ -20,7 +20,7 @@ class UpdateProfilRequest extends FormRequest
 
             // Email wajib diisi, harus unik
             // Kecuali email milik user sendiri
-            'email' => 'required|email|unique:users,email,'
+            'email' => 'sometimes|email|unique:users,email,'
                         . Auth::id() . ',id',
         ];
     }
