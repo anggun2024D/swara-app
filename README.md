@@ -1,417 +1,238 @@
-# 🗺️ SWARA — Suara Warga untuk Ruang dan Aset
+# 🗺️ SWARA Dashboard — Frontend
 
-> Platform pelaporan infrastruktur berbasis GIS untuk smart city Kabupaten Lamongan.  
-> Dibangun dengan **Next.js 14** (frontend) dan **Laravel** (backend).
+**Suara Warga untuk Ruang dan Aset**  
+Universitas Negeri Surabaya | D4 Manajemen Informatika
+
+Platform pelaporan infrastruktur berbasis GIS untuk smart city Kabupaten Lamongan.  
+Dibangun dengan **Next.js 14 App Router** + **TypeScript** + **Tailwind CSS**.
+
+> 📦 Repository ini menyimpan **frontend** di branch `frontend` dan **backend** di branch `main`.  
+> Pastikan kamu berada di branch yang benar sebelum memulai.
 
 ---
 
 ## 📋 Daftar Isi
 
-1. [Prasyarat & Software yang Dibutuhkan](#1-prasyarat--software-yang-dibutuhkan)
-2. [Ekstrak File dari Google Drive](#2-ekstrak-file-dari-google-drive)
-3. [Setup Backend (Laravel)](#3-setup-backend-laravel)
-4. [Setup Frontend (Next.js)](#4-setup-frontend-nextjs)
-5. [Menjalankan Aplikasi](#5-menjalankan-aplikasi)
-6. [Akun untuk Testing](#6-akun-untuk-testing)
-7. [Struktur Folder Frontend](#7-struktur-folder-frontend)
-8. [Struktur Folder Backend](#8-struktur-folder-backend)
-9. [Panduan Mengedit Komponen Frontend](#9-panduan-mengedit-komponen-frontend)
-10. [Konfigurasi Environment](#10-konfigurasi-environment)
-11. [API Endpoints](#11-api-endpoints)
-12. [Troubleshooting](#12-troubleshooting)
+1. [Requirements](#1-requirements)
+2. [Cara Setup Project](#2-cara-setup-project)
+3. [Menjalankan Aplikasi](#3-menjalankan-aplikasi)
+4. [Akun untuk Testing](#4-akun-untuk-testing)
+5. [Struktur Folder](#5-struktur-folder)
+6. [Panduan Mengedit Komponen](#6-panduan-mengedit-komponen)
+7. [Hooks & Services](#7-hooks--services)
+8. [Troubleshooting](#8-troubleshooting)
 
 ---
 
-## 1. Prasyarat & Software yang Dibutuhkan
+## 1. Requirements
 
-Pastikan semua software berikut sudah terinstall di komputer sebelum memulai.
+| Software | Versi Minimum | Link Download |
+|---|---|---|
+| **Node.js** | 18.x LTS | https://nodejs.org |
+| **npm** | 9.x | Sudah termasuk bersama Node.js |
+| **Git** | 2.x | https://git-scm.com |
 
-### Wajib
-
-| Software | Versi Minimum | Link Download | Keterangan |
-|---|---|---|---|
-| **Laragon** | 6.0+ | https://laragon.org/download | Bundel PHP + MySQL + Apache |
-| **Node.js** | 18.x LTS | https://nodejs.org | Runtime JavaScript untuk frontend |
-| **Composer** | 2.x | https://getcomposer.org | Package manager PHP |
-| **Git** | 2.x | https://git-scm.com | Version control (opsional tapi disarankan) |
-
-### Sudah Termasuk di Laragon
-- PHP 8.1+
-- MySQL 8.0
-- Apache / Nginx
-
-### Cek Instalasi
-
-Buka terminal / Command Prompt, jalankan perintah berikut untuk memverifikasi:
-
+Cek instalasi:
 ```bash
-node --version       # Harus: v18.x.x atau lebih baru
-npm --version        # Harus: 9.x.x atau lebih baru
-php --version        # Harus: PHP 8.1 atau lebih baru
-composer --version   # Harus: Composer 2.x
+node --version    # Harus: v18.x.x atau lebih baru
+npm --version     # Harus: 9.x.x atau lebih baru
 ```
+
+> ⚠️ Backend Laravel harus sudah berjalan di `http://127.0.0.1:8000` sebelum menjalankan frontend.  
+> Lihat README di branch `main` untuk setup backend.
 
 ---
 
-## 2. Ekstrak File dari Google Drive
+## 2. Cara Setup Project
 
-### Langkah-langkah
-
-1. **Download kedua file ZIP** dari Google Drive:
-   - `SWARA-Dashboard.zip` → file frontend (Next.js)
-   - `swara-backend.zip` → file backend (Laravel)
-
-2. **Buat folder kerja**, disarankan di root Laragon agar mudah diakses:
-   ```
-   C:\laragon\www\
-   ```
-
-3. **Ekstrak `swara-backend.zip`** ke:
-   ```
-   C:\laragon\www\swara-backend\
-   ```
-
-4. **Ekstrak `SWARA-Dashboard.zip`** ke lokasi manapun, contoh:
-   ```
-   C:\Users\NamaKamu\Documents\SWARA-Dashboard\
-   ```
-   atau langsung di dalam `C:\laragon\www\` jika ingin semua dalam satu tempat.
-
-5. Pastikan struktur folder akhir seperti ini:
-   ```
-   C:\laragon\www\
-   └── swara-backend\          ← folder backend Laravel
-       ├── app\
-       ├── routes\
-       ├── .env                ← akan dibuat di langkah berikutnya
-       └── ...
-
-   C:\Users\NamaKamu\Documents\
-   └── SWARA-Dashboard\        ← folder frontend Next.js
-       ├── src\
-       ├── .env.local          ← akan dibuat di langkah berikutnya
-       └── ...
-   ```
-
----
-
-## 3. Setup Backend (Laravel)
-
-Buka **terminal baru** (PowerShell / CMD), lalu ikuti langkah berikut.
-
-### 3.1 Masuk ke Folder Backend
+### 2.1 Clone Repository & Pindah ke Branch Frontend
 
 ```bash
-cd C:\laragon\www\swara-backend
+git clone https://github.com/anggun2024D/swara-app.git
+cd swara-app
+git checkout frontend
 ```
 
-### 3.2 Install Dependensi PHP
-
-```bash
-composer install
-```
-
-Tunggu hingga selesai. Proses ini akan mengunduh semua library PHP yang dibutuhkan ke folder `vendor/`.
-
-### 3.3 Buat File Environment
-
-Salin file contoh environment:
-
-```bash
-copy .env.example .env
-```
-
-Atau jika tidak ada `.env.example`, buat file `.env` baru dan isi dengan:
-
-```env
-APP_NAME=SWARA
-APP_ENV=local
-APP_KEY=
-APP_DEBUG=true
-APP_URL=http://127.0.0.1:8000
-
-LOG_CHANNEL=stack
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=swara_db
-DB_USERNAME=root
-DB_PASSWORD=
-
-JWT_SECRET=VzQCcvbQMllqsYHjXuT5nsGkK2gNTIqGgNgmAVGp796VseTVDRfnRFWlpW05d3MT
-JWT_TTL=1440
-JWT_REFRESH_TTL=20160
-
-CLOUDINARY_CLOUD_NAME=dkqeyc6eo
-CLOUDINARY_API_KEY=596367781669349
-CLOUDINARY_API_SECRET=oVzpyoTxCuh0jddvjK7Ay00cpQw
-
-FIREBASE_PROJECT_ID=swara-mi-2026
-```
-
-> ⚠️ **Penting:** Pastikan tidak ada spasi di sekitar tanda `=` dan tidak ada spasi di akhir nilai, terutama pada `CLOUDINARY_API_KEY`.
-
-### 3.4 Generate Application Key
-
-```bash
-php artisan key:generate
-```
-
-### 3.5 Buat Database
-
-1. **Buka Laragon**, klik kanan pada tray icon → **Database** → **HeidiSQL** (atau buka phpMyAdmin via browser di `http://localhost/phpmyadmin`)
-2. Login dengan:
-   - Host: `127.0.0.1`
-   - User: `root`
-   - Password: *(kosong)*
-3. Buat database baru dengan nama: **`swara_db`**
-4. Encoding: `utf8mb4_unicode_ci`
-
-### 3.6 Jalankan Migration & Seeder
-
-```bash
-# Jalankan semua migration (buat tabel)
-php artisan migrate
-
-# Jalankan seeder (isi data awal: roles, kategori, user test)
-php artisan db:seed
-```
-
-Jika ingin reset dan isi ulang dari awal:
-
-```bash
-php artisan migrate:fresh --seed
-```
-
-### 3.7 Generate JWT Secret (jika belum ada)
-
-```bash
-php artisan jwt:secret
-```
-
-### 3.8 Buat Storage Link (untuk file upload lokal)
-
-```bash
-php artisan storage:link
-```
-
-### 3.9 Jalankan Server Backend
-
-```bash
-php artisan serve
-```
-
-Server backend akan berjalan di: **http://127.0.0.1:8000**
-
-Biarkan terminal ini tetap buka. Buka terminal baru untuk langkah frontend.
-
----
-
-## 4. Setup Frontend (Next.js)
-
-Buka **terminal baru**, lalu ikuti langkah berikut.
-
-### 4.1 Masuk ke Folder Frontend
-
-```bash
-cd C:\Users\NamaKamu\Documents\SWARA-Dashboard
-```
-
-Sesuaikan path dengan lokasi ekstrak kamu.
-
-### 4.2 Install Dependensi Node.js
+### 2.2 Install Dependencies
 
 ```bash
 npm install
 ```
 
-Tunggu hingga selesai. Proses ini mengunduh semua library JavaScript ke folder `node_modules/`.
+Tunggu hingga selesai. Semua library JavaScript akan terunduh ke folder `node_modules/`.
 
-### 4.3 Buat File Environment
+### 2.3 Buat File Environment
 
-Buat file `.env.local` di root folder frontend:
+Buat file `.env.local` di root folder:
 
 ```bash
 # Windows CMD
 echo NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api > .env.local
-
-# Atau buat manual — buat file baru bernama .env.local lalu isi:
 ```
 
-Isi file `.env.local`:
+Atau buat file `.env.local` secara manual dan isi dengan:
 
 ```env
 NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
 ```
 
-> ⚠️ Prefix `NEXT_PUBLIC_` wajib ada agar variabel bisa diakses di sisi browser.
+> ⚠️ Prefix `NEXT_PUBLIC_` wajib ada agar variabel bisa diakses di sisi browser (client-side).
 
-### 4.4 Jalankan Development Server
+### 2.4 Jalankan Development Server
 
 ```bash
 npm run dev
 ```
 
-Frontend akan berjalan di: **http://localhost:3000**
+Aplikasi berjalan di: **http://localhost:3000**
 
 ---
 
-## 5. Menjalankan Aplikasi
+## 3. Menjalankan Aplikasi
 
-Setiap kali ingin membuka aplikasi, ikuti urutan berikut:
-
-### Urutan yang Benar
+Setiap kali ingin membuka aplikasi, pastikan urutan ini benar:
 
 ```
-1. Buka Laragon → Start All (untuk MySQL)
-2. Terminal 1: cd swara-backend → php artisan serve
-3. Terminal 2: cd SWARA-Dashboard → npm run dev
+1. Buka Laragon → Start All (untuk MySQL aktif)
+2. Terminal 1 → folder swara-backend → php artisan serve
+3. Terminal 2 → folder SWARA-Dashboard → npm run dev
 4. Buka browser → http://localhost:3000
 ```
 
 ### Ringkasan URL
 
-| Layanan | URL | Keterangan |
+| Halaman | URL | Keterangan |
 |---|---|---|
-| **Landing Page** | http://localhost:3000 | Halaman publik SWARA |
-| **Login** | http://localhost:3000/login | Halaman login |
-| **Dashboard User** | http://localhost:3000/dashboard | Setelah login sebagai user |
-| **Dashboard Admin** | http://localhost:3000/admin/dashboard | Setelah login sebagai admin |
-| **Backend API** | http://127.0.0.1:8000/api | Endpoint API Laravel |
-| **phpMyAdmin** | http://localhost/phpmyadmin | Manajemen database |
+| Landing Page | http://localhost:3000 | Halaman publik utama |
+| Login | http://localhost:3000/login | Halaman login |
+| Register | http://localhost:3000/register | Halaman registrasi |
+| Dashboard User | http://localhost:3000/dashboard | Setelah login sebagai user |
+| Buat Laporan | http://localhost:3000/laporan | Form laporan baru |
+| Peta Wilayah | http://localhost:3000/peta | Peta interaktif fullscreen |
+| Kategori | http://localhost:3000/kategori | Daftar kategori laporan |
+| Riwayat | http://localhost:3000/riwayat | Riwayat laporan user |
+| Profil | http://localhost:3000/profil | Halaman profil user |
+| Bantuan | http://localhost:3000/bantuan | FAQ & kontak |
+| Dashboard Admin | http://localhost:3000/admin/dashboard | Setelah login sebagai admin |
+| Laporan Admin | http://localhost:3000/admin/reports | Manajemen laporan |
+| Peta Monitoring | http://localhost:3000/admin/map-monitoring | Monitoring real-time |
+| Verifikasi | http://localhost:3000/admin/verification | Antrian verifikasi laporan |
+| Pengguna | http://localhost:3000/admin/users | Manajemen pengguna |
+| Analytics | http://localhost:3000/admin/analytics | Grafik & statistik |
 
 ---
 
-## 6. Akun untuk Testing
+## 4. Akun untuk Testing
 
 | Email | Password | Role | Akses |
 |---|---|---|---|
-| `admin@swara.com` | `password` | Admin | Semua fitur admin + dashboard admin |
-| `user@swara.com` | `password` | User | Dashboard user, buat laporan, riwayat |
+| `admin@swara.com` | `password` | Admin | Semua fitur admin |
+| `user@swara.com` | `password` | User | Dashboard user, buat laporan |
 
 ---
 
-## 7. Struktur Folder Frontend
+## 5. Struktur Folder
 
 ```
 SWARA-Dashboard/
-├── public/                         ← File statis (logo, gambar, favicon)
+├── public/                             ← File statis (logo, favicon, gambar)
 │   └── logo.png
 │
 ├── src/
-│   ├── app/                        ← Next.js App Router (halaman-halaman)
+│   ├── app/                            ← Next.js App Router — semua halaman ada di sini
 │   │   │
-│   │   ├── (public)/               ← Route group: halaman publik (tanpa layout dashboard)
-│   │   │   ├── page.tsx            ← Landing page (http://localhost:3000)
-│   │   │   ├── login/
-│   │   │   │   └── page.tsx        ← Halaman login
-│   │   │   └── register/
-│   │   │       └── page.tsx        ← Halaman registrasi
+│   │   ├── (public)/                   ← Halaman publik (tanpa layout dashboard)
+│   │   │   ├── page.tsx                ← Landing page → http://localhost:3000
+│   │   │   ├── login/page.tsx          ← Halaman login
+│   │   │   └── register/page.tsx       ← Halaman registrasi
 │   │   │
-│   │   ├── (dashboard)/            ← Route group: dashboard user (wajib login sebagai user)
-│   │   │   ├── layout.tsx          ← Layout: Sidebar + Topbar + AuthGuard role="user"
-│   │   │   ├── dashboard/
-│   │   │   │   └── page.tsx        ← Halaman utama dashboard user
-│   │   │   ├── laporan/
-│   │   │   │   └── page.tsx        ← Form buat laporan baru
-│   │   │   ├── peta/
-│   │   │   │   └── page.tsx        ← Peta interaktif fullscreen
+│   │   ├── (dashboard)/                ← Dashboard user — wajib login sebagai "user"
+│   │   │   ├── layout.tsx              ← Layout: Sidebar + Topbar + AuthGuard role="user"
+│   │   │   ├── dashboard/page.tsx      ← Halaman utama dashboard user
+│   │   │   ├── laporan/page.tsx        ← Form buat laporan baru
+│   │   │   ├── peta/page.tsx           ← Peta interaktif fullscreen
 │   │   │   ├── kategori/
-│   │   │   │   ├── page.tsx        ← Daftar semua kategori
-│   │   │   │   └── [id]/
-│   │   │   │       └── page.tsx    ← Detail kategori + laporan per kategori
+│   │   │   │   ├── page.tsx            ← Daftar semua kategori
+│   │   │   │   └── [id]/page.tsx       ← Laporan per kategori
 │   │   │   ├── riwayat/
-│   │   │   │   ├── page.tsx        ← Riwayat laporan milik user
-│   │   │   │   └── [id]/
-│   │   │   │       └── page.tsx    ← Detail laporan tertentu
+│   │   │   │   ├── page.tsx            ← Riwayat laporan milik user
+│   │   │   │   └── [id]/page.tsx       ← Detail satu laporan
 │   │   │   ├── profil/
-│   │   │   │   ├── page.tsx        ← Halaman profil user
-│   │   │   │   └── edit/
-│   │   │   │       └── page.tsx    ← Edit profil & ubah password
-│   │   │   ├── notifikasi/
-│   │   │   │   └── page.tsx        ← Daftar notifikasi user
-│   │   │   └── bantuan/
-│   │   │       └── page.tsx        ← Halaman bantuan & FAQ
+│   │   │   │   ├── page.tsx            ← Halaman profil
+│   │   │   │   └── edit/page.tsx       ← Edit profil & ubah password
+│   │   │   ├── notifikasi/page.tsx     ← Daftar notifikasi
+│   │   │   └── bantuan/page.tsx        ← Halaman bantuan & FAQ
 │   │   │
-│   │   ├── (admin)/                ← Route group: dashboard admin (wajib login sebagai admin)
-│   │   │   ├── layout.tsx          ← Layout: AdminSidebar + AdminTopbar + AuthGuard role="admin"
+│   │   ├── (admin)/                    ← Dashboard admin — wajib login sebagai "admin"
+│   │   │   ├── layout.tsx              ← Layout: AdminSidebar + AdminTopbar + AuthGuard role="admin"
 │   │   │   └── admin/
-│   │   │       ├── dashboard/
-│   │   │       │   └── page.tsx    ← Dashboard utama admin
-│   │   │       ├── reports/
-│   │   │       │   └── page.tsx    ← Manajemen semua laporan
-│   │   │       ├── analytics/
-│   │   │       │   └── page.tsx    ← Halaman analitik & statistik
-│   │   │       ├── notifications/
-│   │   │       │   └── page.tsx    ← Manajemen notifikasi
-│   │   │       ├── users/
-│   │   │       │   └── page.tsx    ← Manajemen pengguna
-│   │   │       ├── map-monitoring/
-│   │   │       │   └── page.tsx    ← Monitoring peta real-time
-│   │   │       ├── verification/
-│   │   │       │   └── page.tsx    ← Antrian verifikasi laporan
-│   │   │       └── settings/
-│   │   │           └── page.tsx    ← Pengaturan sistem
+│   │   │       ├── dashboard/page.tsx      ← Dashboard utama admin
+│   │   │       ├── reports/page.tsx        ← Manajemen laporan
+│   │   │       ├── analytics/page.tsx      ← Grafik & statistik
+│   │   │       ├── notifications/page.tsx  ← Manajemen notifikasi
+│   │   │       ├── users/page.tsx          ← Manajemen pengguna
+│   │   │       ├── map-monitoring/page.tsx ← Monitoring peta real-time
+│   │   │       ├── verification/page.tsx   ← Antrian verifikasi laporan
+│   │   │       └── settings/page.tsx       ← Pengaturan sistem
 │   │   │
-│   │   └── layout.tsx              ← Root layout: AuthProvider + Toaster
+│   │   └── layout.tsx                  ← Root layout: AuthProvider + Toaster
 │   │
-│   ├── components/                 ← Komponen React yang dapat digunakan ulang
+│   ├── components/                     ← Semua komponen UI yang dapat digunakan ulang
 │   │   │
-│   │   ├── landing/                ← Komponen khusus landing page
-│   │   │   ├── Navbar.tsx          ← Navigasi atas landing page
-│   │   │   ├── HeroSection.tsx     ← Bagian hero dengan stats real-time
-│   │   │   ├── CategorySection.tsx ← Grid kategori layanan
-│   │   │   ├── GISMapSection.tsx   ← Peta publik dengan filter
-│   │   │   ├── AnalyticsSection.tsx← Statistik & grafik publik
-│   │   │   ├── FeaturesSection.tsx ← Fitur-fitur unggulan
-│   │   │   └── Footer.tsx          ← Footer landing page
+│   │   ├── landing/                    ← Komponen khusus landing page
+│   │   │   ├── Navbar.tsx              ← Navigasi atas (deteksi status login otomatis)
+│   │   │   ├── HeroSection.tsx         ← Hero + stats real-time dari API
+│   │   │   ├── CategorySection.tsx     ← Grid kategori layanan (real API)
+│   │   │   ├── GISMapSection.tsx       ← Peta publik dengan filter (real API)
+│   │   │   ├── AnalyticsSection.tsx    ← Statistik & grafik publik (real API)
+│   │   │   ├── FeaturesSection.tsx     ← Fitur-fitur unggulan
+│   │   │   └── Footer.tsx              ← Footer landing page
 │   │   │
-│   │   ├── layout/                 ← Komponen layout dashboard user
-│   │   │   ├── Sidebar.tsx         ← Sidebar navigasi user
-│   │   │   └── Topbar.tsx          ← Topbar user (avatar, notifikasi)
+│   │   ├── layout/                     ← Layout komponen dashboard user
+│   │   │   ├── Sidebar.tsx             ← Sidebar navigasi user (ada tombol ke landing page)
+│   │   │   └── Topbar.tsx              ← Topbar: avatar, nama, notifikasi
 │   │   │
 │   │   ├── guards/
-│   │   │   └── AuthGuard.tsx       ← Proteksi route berdasarkan role
+│   │   │   └── AuthGuard.tsx           ← Proteksi route berdasarkan role user/admin
 │   │   │
-│   │   ├── MapComponent.tsx        ← Komponen peta Leaflet (dipakai di banyak tempat)
+│   │   ├── MapComponent.tsx            ← Komponen peta Leaflet (SSR disabled)
 │   │   │
-│   │   ├── laporan/                ← Komponen form buat laporan
-│   │   │   ├── LaporanForm.tsx     ← Form utama laporan
-│   │   │   ├── ImageUpload.tsx     ← Upload foto laporan
-│   │   │   ├── PreviewPanel.tsx    ← Preview sebelum submit
-│   │   │   └── MiniMap.tsx         ← Peta kecil interaktif di form
+│   │   ├── laporan/                    ← Komponen form buat laporan
+│   │   │   ├── LaporanForm.tsx         ← Form utama (geocoding + mini map + priority)
+│   │   │   ├── ImageUpload.tsx         ← Upload foto (max 5 foto, max 5MB per foto)
+│   │   │   ├── PreviewPanel.tsx        ← Preview data sebelum submit
+│   │   │   └── MiniMap.tsx             ← Peta kecil interaktif + reverse geocode
 │   │   │
-│   │   ├── peta/                   ← Komponen halaman peta user
-│   │   │   ├── PetaMap.tsx         ← Peta fullscreen
-│   │   │   └── ReportDetailSidebar.tsx ← Sidebar detail laporan
+│   │   ├── peta/
+│   │   │   ├── PetaMap.tsx             ← Peta fullscreen dengan marker per kategori
+│   │   │   └── ReportDetailSidebar.tsx ← Sidebar detail laporan (slide dari kanan)
 │   │   │
-│   │   ├── kategori/               ← Komponen halaman kategori
-│   │   │   ├── KategoriHero.tsx    ← Header halaman kategori
-│   │   │   └── KategoriCard.tsx    ← Card per kategori
+│   │   ├── kategori/
+│   │   │   ├── KategoriHero.tsx        ← Header halaman kategori
+│   │   │   └── KategoriCard.tsx        ← Card kategori (render icon_url sebagai <img>)
 │   │   │
-│   │   ├── riwayat/                ← Komponen halaman riwayat
-│   │   │   ├── RiwayatCard.tsx     ← Card per laporan di riwayat
-│   │   │   ├── RiwayatHeader.tsx   ← Header + search riwayat
-│   │   │   ├── RiwayatTabs.tsx     ← Tab filter status
-│   │   │   └── RiwayatSidebar.tsx  ← Sidebar statistik riwayat
+│   │   ├── riwayat/
+│   │   │   ├── RiwayatCard.tsx         ← Card per laporan
+│   │   │   ├── RiwayatHeader.tsx       ← Header + search
+│   │   │   ├── RiwayatTabs.tsx         ← Tab filter: semua/tersubmit/diproses/selesai/ditolak
+│   │   │   └── RiwayatSidebar.tsx      ← Sidebar statistik riwayat
 │   │   │
-│   │   ├── profil/                 ← Komponen halaman profil
-│   │   │   ├── ProfilAvatar.tsx    ← Upload & tampil avatar
-│   │   │   └── ProfilMenu.tsx      ← Menu profil & logout
+│   │   ├── profil/
+│   │   │   ├── ProfilAvatar.tsx        ← Upload & tampil foto profil
+│   │   │   └── ProfilMenu.tsx          ← Menu profil + tombol logout
 │   │   │
-│   │   ├── dashboard/              ← Komponen dashboard user
-│   │   │   ├── HeroSection.tsx     ← Sambutan & statistik user
-│   │   │   ├── StatsCards.tsx      ← Kartu statistik laporan user
-│   │   │   ├── CategoryGrid.tsx    ← Grid kategori di dashboard
-│   │   │   ├── MapSection.tsx      ← Section peta mini di dashboard
-│   │   │   └── UpdatesPanel.tsx    ← Panel update terbaru
+│   │   ├── dashboard/                  ← Widget dashboard user
+│   │   │   ├── HeroSection.tsx         ← Sambutan + statistik user
+│   │   │   ├── StatsCards.tsx          ← Kartu total/selesai/diproses laporan
+│   │   │   ├── CategoryGrid.tsx        ← Grid kategori (link ke /kategori/[id])
+│   │   │   ├── MapSection.tsx          ← Peta mini di dashboard
+│   │   │   └── UpdatesPanel.tsx        ← Panel update & notifikasi terbaru
 │   │   │
-│   │   └── admin/                  ← Komponen khusus admin
+│   │   └── admin/                      ← Komponen khusus admin
 │   │       ├── layout/
-│   │       │   ├── AdminSidebar.tsx    ← Sidebar admin (dark theme)
-│   │       │   └── AdminTopbar.tsx     ← Topbar admin + search
-│   │       ├── dashboard/          ← Semua widget di admin dashboard
+│   │       │   ├── AdminSidebar.tsx    ← Sidebar admin dark theme (ada tombol ke landing page)
+│   │       │   └── AdminTopbar.tsx     ← Topbar admin + search fungsional
+│   │       ├── dashboard/
 │   │       │   ├── WelcomeBanner.tsx
 │   │       │   ├── AnalyticsCards.tsx
 │   │       │   ├── ReportsChart.tsx
@@ -424,506 +245,303 @@ SWARA-Dashboard/
 │   │       │   ├── UrgentReportsPanel.tsx
 │   │       │   └── KecamatanActivity.tsx
 │   │       ├── map-monitoring/
-│   │       │   └── AdminMap.tsx        ← Peta monitoring admin
+│   │       │   └── AdminMap.tsx
 │   │       └── reports/
-│   │           ├── ReportsTable.tsx    ← Tabel semua laporan
-│   │           ├── ReportsFilter.tsx   ← Filter laporan
-│   │           └── ReportDetailDrawer.tsx ← Drawer detail laporan
+│   │           ├── ReportsTable.tsx        ← Tabel laporan dengan pagination
+│   │           ├── ReportsFilter.tsx       ← Filter + useSearchParams (sync dengan URL)
+│   │           └── ReportDetailDrawer.tsx  ← Drawer detail + verifikasi laporan
 │   │
-│   ├── hooks/                      ← Custom React hooks
-│   │   ├── useAuth.ts              ← State autentikasi user
-│   │   ├── useReports.ts           ← Fetch daftar laporan (admin)
-│   │   ├── useRiwayat.ts           ← Fetch riwayat laporan milik user
-│   │   ├── useAdminDashboard.ts    ← Metrics dashboard admin
-│   │   ├── useMapReports.ts        ← Data laporan untuk peta (dengan koordinat)
-│   │   ├── useUserReports.ts       ← Laporan semua user untuk peta
-│   │   ├── useUserDashboard.ts     ← Data dashboard user (paralel fetch)
-│   │   ├── useVerification.ts      ← Antrian verifikasi laporan admin
-│   │   ├── useKategori.ts          ← Daftar kategori (public)
-│   │   ├── useNotifications.ts     ← Notifikasi user
-│   │   ├── useAnalytics.ts         ← Data analitik admin
-│   │   ├── useUsers.ts             ← Daftar pengguna (admin)
-│   │   ├── usePublicMapReports.ts  ← Data peta untuk landing page (tanpa auth)
-│   │   └── usePublicStats.ts       ← Statistik publik untuk landing page
+│   ├── hooks/                          ← Custom React hooks (logika fetch data)
+│   │   ├── useAuth.ts                  ← State login, user, isAuthenticated
+│   │   ├── useReports.ts               ← Fetch laporan dengan filter (admin)
+│   │   ├── useRiwayat.ts               ← Riwayat laporan milik user sendiri
+│   │   ├── useAdminDashboard.ts        ← Semua metrics dashboard admin
+│   │   ├── useMapReports.ts            ← Data peta berautentikasi (auto-refresh 30 detik)
+│   │   ├── useUserReports.ts           ← Laporan semua user untuk peta
+│   │   ├── useUserDashboard.ts         ← Fetch paralel: riwayat + kategori + notifikasi
+│   │   ├── useVerification.ts          ← Antrian verifikasi laporan admin
+│   │   ├── useKategori.ts              ← Daftar kategori (public, tanpa token)
+│   │   ├── useNotifications.ts         ← Notifikasi dengan optimistic update
+│   │   ├── useAnalytics.ts             ← Data analitik admin
+│   │   ├── useUsers.ts                 ← Daftar pengguna (admin)
+│   │   ├── usePublicMapReports.ts      ← Data peta landing page (tanpa auth)
+│   │   └── usePublicStats.ts           ← Statistik publik landing page (tanpa auth)
 │   │
-│   ├── services/                   ← Fungsi pemanggilan API
-│   │   ├── api.ts                  ← Axios instance + JWT interceptor
-│   │   ├── auth.service.ts         ← Login, register, logout
-│   │   ├── reports.service.ts      ← CRUD laporan
-│   │   ├── categories.service.ts   ← Fetch kategori
-│   │   ├── notifications.service.ts← Fetch & kelola notifikasi
-│   │   ├── analytics.service.ts    ← Data analitik
-│   │   ├── users.service.ts        ← Manajemen user
-│   │   └── dashboard.service.ts    ← Data dashboard
+│   ├── services/                       ← Layer pemanggilan API (Axios)
+│   │   ├── api.ts                      ← Axios instance + JWT interceptor otomatis
+│   │   ├── auth.service.ts             ← login(), register(), logout()
+│   │   ├── reports.service.ts          ← getReports(), createReport(), dll
+│   │   ├── categories.service.ts       ← getKategori()
+│   │   ├── notifications.service.ts    ← getNotifikasi(), markAsRead(), dll
+│   │   ├── analytics.service.ts        ← getAnalytics()
+│   │   ├── users.service.ts            ← getUsers() (admin)
+│   │   └── dashboard.service.ts        ← getDashboardData()
 │   │
 │   ├── contexts/
-│   │   └── AuthContext.tsx         ← Global state autentikasi (React Context)
+│   │   └── AuthContext.tsx             ← Global state: user, isAuthenticated, login, logout, refreshUser
 │   │
-│   └── types/                      ← TypeScript type definitions
-│       ├── auth.ts                 ← Tipe AuthUser, LoginRequest, dll
-│       ├── report.ts               ← Tipe Report, ReportStatus, ReportFilters
-│       ├── category.ts             ← Tipe Kategori
-│       ├── notification.ts         ← Tipe Notifikasi
-│       ├── analytics.ts            ← Tipe data analitik
-│       ├── user.ts                 ← Tipe User (admin)
-│       └── index.ts                ← Barrel export semua types
+│   └── types/                          ← TypeScript type definitions
+│       ├── auth.ts                     ← AuthUser, LoginRequest, RegisterRequest
+│       ├── report.ts                   ← Report, ReportStatus, ReportPriority, ReportFilters
+│       ├── category.ts                 ← Kategori
+│       ├── notification.ts             ← Notifikasi
+│       ├── analytics.ts                ← Data analitik
+│       ├── user.ts                     ← User (admin view)
+│       └── index.ts                    ← Barrel export semua types
 │
-├── .env.local                      ← Variabel environment frontend (JANGAN di-commit)
-├── next.config.js                  ← Konfigurasi Next.js
-├── tailwind.config.js              ← Konfigurasi Tailwind CSS
-├── tsconfig.json                   ← Konfigurasi TypeScript
-└── package.json                    ← Daftar dependensi Node.js
+├── .env.local                          ← Environment variables (JANGAN di-commit ke Git!)
+├── next.config.js                      ← Konfigurasi Next.js
+├── tailwind.config.js                  ← Konfigurasi warna & tema Tailwind CSS
+├── tsconfig.json                       ← Konfigurasi TypeScript
+└── package.json                        ← Daftar dependensi & scripts npm
 ```
 
 ---
 
-## 8. Struktur Folder Backend
+## 6. Panduan Mengedit Komponen
 
-```
-swara-backend/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/            ← Logika bisnis tiap endpoint
-│   │   │   ├── AuthController.php          ← Login, register, logout, refresh token
-│   │   │   ├── ReportController.php        ← CRUD laporan + verifikasi admin
-│   │   │   ├── KategoriController.php      ← Daftar & detail kategori
-│   │   │   ├── NotifikasiController.php    ← Notifikasi user
-│   │   │   ├── ProfilController.php        ← Update profil, foto, password
-│   │   │   ├── AdminController.php         ← Manajemen pengguna (admin only)
-│   │   │   ├── PublicStatsController.php   ← Statistik publik (tanpa auth)
-│   │   │   ├── BroadcastController.php     ← Broadcast notifikasi ke semua user
-│   │   │   └── FCMTokenController.php      ← Simpan & hapus FCM token (push notif)
-│   │   │
-│   │   ├── Requests/               ← Validasi input request
-│   │   │   └── StoreReportRequest.php      ← Validasi form buat laporan
-│   │   │
-│   │   └── Resources/              ← Format response JSON
-│   │       └── ReportResource.php          ← Format data laporan yang dikirim ke frontend
-│   │
-│   ├── Models/                     ← Eloquent ORM models
-│   │   ├── User.php                ← Model pengguna
-│   │   ├── Report.php              ← Model laporan
-│   │   ├── ReportImage.php         ← Model foto laporan
-│   │   └── Role.php                ← Model role (user/admin)
-│   │
-│   └── Services/
-│       └── FCMService.php          ← Service untuk kirim push notification via Firebase
-│
-├── database/
-│   ├── migrations/                 ← Skema tabel database
-│   │   ├── ..._create_users_table.php
-│   │   ├── ..._create_roles_table.php
-│   │   ├── ..._create_reports_table.php
-│   │   ├── ..._create_report_categories_table.php
-│   │   ├── ..._create_report_images_table.php
-│   │   ├── ..._add_priority_to_reports.php
-│   │   ├── ..._add_admin_notes_to_reports.php
-│   │   └── ..._add_is_urgent_to_reports.php
-│   │
-│   └── seeders/                    ← Data awal database
-│       ├── DatabaseSeeder.php
-│       ├── RoleSeeder.php          ← Isi tabel roles (user, admin)
-│       ├── UserSeeder.php          ← Buat akun test (admin & user)
-│       └── KategoriSeeder.php      ← Isi kategori laporan awal
-│
-├── routes/
-│   └── api.php                     ← Semua definisi endpoint API
-│
-├── config/
-│   ├── cors.php                    ← Konfigurasi CORS (izinkan localhost:3000)
-│   └── jwt.php                     ← Konfigurasi JWT authentication
-│
-├── storage/
-│   └── app/public/                 ← File upload lokal (jika tidak pakai Cloudinary)
-│
-├── .env                            ← Variabel environment backend (JANGAN di-commit)
-├── composer.json                   ← Daftar dependensi PHP
-└── artisan                         ← CLI Laravel
-```
+### 6.1 Mengubah Teks Landing Page
 
-### Tabel Database
-
-| Tabel | Keterangan |
+| Yang ingin diubah | File yang diedit |
 |---|---|
-| `users` | Data pengguna (id UUID, nama, email, password_hash, foto, role_id) |
-| `roles` | Peran pengguna (id:1=user, id:2=admin) |
-| `reports` | Data laporan (judul, deskripsi, koordinat, status, priority, is_urgent) |
-| `report_categories` | Kategori laporan (name, icon_url, is_active) |
-| `report_images` | Foto-foto laporan (report_id, image_url Cloudinary) |
-| `notifications` | Notifikasi in-app untuk user |
+| Menu navigasi | `src/components/landing/Navbar.tsx` → array `navLinks` |
+| Judul & subjudul hero | `src/components/landing/HeroSection.tsx` → tag `<h1>` dan `<p>` |
+| Tombol CTA hero | `src/components/landing/HeroSection.tsx` → `<Link href="...">` |
+| Kontak & alamat | `src/components/landing/Footer.tsx` |
 
----
+### 6.2 Mengubah Warna & Tema
 
-## 9. Panduan Mengedit Komponen Frontend
-
-### 9.1 Mengubah Teks & Konten Landing Page
-
-**Navbar (teks menu, tombol):**
-```
-src/components/landing/Navbar.tsx
-```
-- Cari array `navLinks` untuk mengubah item menu navigasi
-- Cari bagian `Desktop Buttons` untuk mengubah teks tombol Login / Mulai Sekarang
-
-**Hero Section (judul, subjudul, tombol CTA):**
-```
-src/components/landing/HeroSection.tsx
-```
-- Ubah teks `<h1>` untuk judul utama
-- Ubah teks `<p>` di bawahnya untuk deskripsi
-- Ganti `href` di `<Link>` untuk mengubah tujuan tombol CTA
-
-**Footer:**
-```
-src/components/landing/Footer.tsx
-```
-- Edit alamat, nomor telepon, email kontak di sini
-
-### 9.2 Mengubah Warna & Tema
-
-Warna utama diatur di `tailwind.config.js`:
+Edit file `tailwind.config.js`:
 
 ```js
-// tailwind.config.js
 theme: {
   extend: {
     colors: {
-      primary: '#...',         // warna utama (hijau)
-      'primary-hover': '#...', // warna hover tombol
-      gold: '#...',            // warna aksen emas
-      bg: '#...',              // warna latar belakang
-      text: '#...',            // warna teks utama
-      muted: '#...',           // warna teks sekunder
-      border: '#...',          // warna garis border
+      primary:       '#1a5c38', // warna utama hijau
+      'primary-hover': '#154d2e',
+      gold:          '#d4a017', // warna aksen emas
+      bg:            '#f8f9fa', // latar belakang halaman
+      text:          '#1a1a2e', // teks utama
+      muted:         '#6b7280', // teks sekunder/placeholder
+      border:        '#e5e7eb', // warna border/garis
     }
   }
 }
 ```
 
-Setelah mengubah warna di sini, semua komponen yang menggunakan class `text-primary`, `bg-primary`, dll akan otomatis ikut berubah.
+Semua komponen yang memakai `bg-primary`, `text-primary`, dll akan otomatis ikut berubah.
 
-### 9.3 Mengubah Kategori Laporan
+### 6.3 Mengubah Kategori Laporan
 
-Kategori dikelola dari **database**, bukan dari kode. Untuk menambah/edit kategori:
+Kategori dikelola dari **database**, bukan dari kode frontend. Untuk menambah atau mengedit:
 
-1. Buka phpMyAdmin di `http://localhost/phpmyadmin`
-2. Pilih database `swara_db`
-3. Buka tabel `report_categories`
-4. Edit kolom:
-   - `name` → nama kategori
-   - `icon_url` → URL gambar ikon (upload ke Cloudinary terlebih dahulu)
-   - `is_active` → `1` untuk tampil, `0` untuk sembunyikan
+1. Buka `http://localhost/phpmyadmin`
+2. Pilih database `swara_db` → tabel `report_categories`
+3. Edit kolom:
+   - `name` → nama kategori yang ditampilkan
+   - `icon_url` → URL gambar ikon (upload ke Cloudinary dulu, lalu paste URL-nya)
+   - `is_active` → `1` tampil, `0` sembunyikan
 
-### 9.4 Mengedit Tampilan Dashboard User
+### 6.4 Mengubah Menu Sidebar User
 
-**Sidebar navigasi user:**
-```
-src/components/layout/Sidebar.tsx
-```
-- Ubah array `navItems` untuk menambah/hapus menu
-- Setiap item: `{ name, href, icon }` — icon dari library `lucide-react`
-
-**Topbar user (avatar, nama):**
-```
-src/components/layout/Topbar.tsx
-```
-
-**Kartu statistik di dashboard:**
-```
-src/components/dashboard/StatsCards.tsx
-```
-
-**Grid kategori di dashboard:**
-```
-src/components/dashboard/CategoryGrid.tsx
-```
-
-### 9.5 Mengedit Tampilan Dashboard Admin
-
-**Sidebar admin:**
-```
-src/components/admin/layout/AdminSidebar.tsx
-```
-- Ubah array `menuItems` untuk menambah/hapus menu admin
-
-**Topbar admin (search, notifikasi):**
-```
-src/components/admin/layout/AdminTopbar.tsx
-```
-- Ubah `SEARCH_CATEGORIES` untuk mengatur ke mana hasil pencarian diarahkan
-
-**Tabel laporan:**
-```
-src/components/admin/reports/ReportsTable.tsx
-```
-
-**Filter laporan:**
-```
-src/components/admin/reports/ReportsFilter.tsx
-```
-
-**Grafik & chart di dashboard admin:**
-```
-src/components/admin/dashboard/ReportsChart.tsx
-src/components/admin/dashboard/CategoryChart.tsx
-src/components/admin/dashboard/StatusChart.tsx
-```
-
-### 9.6 Mengedit Form Laporan
-
-```
-src/components/laporan/LaporanForm.tsx
-```
-- Tambah/hapus field di form
-- Ubah daftar kecamatan di array kecamatan (ada 27 kecamatan Lamongan)
-- Ubah validasi di bagian `validate()`
-
-### 9.7 Menambah Halaman Baru
-
-1. Buat folder di `src/app/(dashboard)/nama-halaman/`
-2. Buat file `page.tsx` di dalamnya
-3. Tambahkan link menu di `src/components/layout/Sidebar.tsx`
-
-Contoh menambah halaman "Pengumuman":
+Edit file `src/components/layout/Sidebar.tsx`, cari array `navItems`:
 
 ```tsx
-// src/app/(dashboard)/pengumuman/page.tsx
-export default function PengumumanPage() {
+const navItems = [
+  { name: 'Dashboard',    href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Buat Laporan', href: '/laporan',   icon: FileText        },
+  // tambah item baru di sini:
+  { name: 'Pengumuman',   href: '/pengumuman', icon: Megaphone      },
+]
+```
+
+Icon diambil dari library `lucide-react` — lihat semua icon di https://lucide.dev/icons
+
+### 6.5 Mengubah Menu Sidebar Admin
+
+Edit file `src/components/admin/layout/AdminSidebar.tsx`, cari array `menuItems`:
+
+```tsx
+const menuItems = [
+  { name: 'Dashboard',       href: '/admin/dashboard',      icon: LayoutDashboard },
+  { name: 'Laporan Masuk',   href: '/admin/reports',        icon: FileText        },
+  // tambah item baru di sini
+]
+```
+
+### 6.6 Mengubah Search di Topbar Admin
+
+Edit file `src/components/admin/layout/AdminTopbar.tsx`, cari array `SEARCH_CATEGORIES`:
+
+```tsx
+const SEARCH_CATEGORIES = [
+  {
+    label: 'Laporan',
+    href: (q: string) => `/admin/reports?search=${encodeURIComponent(q)}`,
+    keywords: ['laporan', 'jalan', 'rusak'],
+  },
+  // tambah kategori search baru di sini
+]
+```
+
+### 6.7 Mengedit Form Laporan
+
+Edit file `src/components/laporan/LaporanForm.tsx`:
+
+- **Tambah field baru** → tambahkan di state `formData` dan di JSX form
+- **Ubah daftar kecamatan** → cari array kecamatan (berisi 27 kecamatan Lamongan)
+- **Ubah validasi** → cari fungsi `validate()`
+
+### 6.8 Menambah Halaman Baru (Dashboard User)
+
+**Langkah 1** — Buat file halaman:
+```
+src/app/(dashboard)/nama-halaman/page.tsx
+```
+
+**Langkah 2** — Isi file halaman:
+```tsx
+export default function NamaHalamanPage() {
   return (
-    <div>
-      <h1>Pengumuman</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold">Nama Halaman</h1>
     </div>
   )
 }
 ```
 
+**Langkah 3** — Tambah ke menu sidebar di `src/components/layout/Sidebar.tsx`:
 ```tsx
-// src/components/layout/Sidebar.tsx — tambahkan ke navItems:
-{ name: 'Pengumuman', href: '/pengumuman', icon: Megaphone },
+{ name: 'Nama Halaman', href: '/nama-halaman', icon: NamaIcon },
 ```
 
-### 9.8 Mengubah Koneksi API
+### 6.9 Mengubah Endpoint API
 
-Semua pemanggilan API ada di:
-```
-src/services/
-```
-
-Jika endpoint backend berubah, edit file service yang relevan. Contoh mengubah endpoint laporan:
+Jika URL endpoint backend berubah, edit file service di `src/services/`:
 
 ```typescript
 // src/services/reports.service.ts
 export const getReports = async (filters: ReportFilters) => {
   const response = await api.get('/laporan', { params: filters })
-  // ganti '/laporan' jika endpoint berubah
+  //                              ^^^^^^^^^ ganti jika endpoint berubah
   return response.data
 }
 ```
 
-URL base API dikonfigurasi di `.env.local`:
+Base URL API dikonfigurasi di `.env.local`:
 ```env
 NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
 ```
 
 ---
 
-## 10. Konfigurasi Environment
+## 7. Hooks & Services
 
-### Frontend — `.env.local`
+### Cara Kerja Sistem Fetch Data
 
-```env
-# URL backend API — sesuaikan jika backend berjalan di port berbeda
-NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
+```
+Halaman (page.tsx)
+    ↓ memanggil
+Custom Hook (hooks/useXxx.ts)
+    ↓ memanggil
+Service (services/xxx.service.ts)
+    ↓ memanggil
+Axios Instance (services/api.ts)
+    ↓ HTTP request
+Backend Laravel (http://127.0.0.1:8000/api)
 ```
 
-### Backend — `.env`
+### Daftar Hook dan Kegunaannya
 
-```env
-# Aplikasi
-APP_NAME=SWARA
-APP_ENV=local
-APP_DEBUG=true
-APP_URL=http://127.0.0.1:8000
+| Hook | Endpoint | Dipakai di |
+|---|---|---|
+| `useAuth` | `GET /auth/me` | Semua halaman |
+| `useRiwayat` | `GET /laporan/riwayat` | Riwayat, Profil |
+| `useUserDashboard` | Paralel: riwayat + kategori + notifikasi | Dashboard user |
+| `useKategori` | `GET /kategori` | Form laporan, Kategori |
+| `useNotifications` | `GET /notifikasi` | Topbar, Notifikasi |
+| `useMapReports` | `GET /laporan?per_halaman=all` | Peta user, Admin map |
+| `useReports` | `GET /laporan` | Admin reports |
+| `useAdminDashboard` | `GET /laporan?per_halaman=all` | Admin dashboard, analytics |
+| `useVerification` | `GET /laporan?status=tersubmit` | Admin verification |
+| `useUsers` | `GET /admin/users` | Admin users |
+| `usePublicStats` | `GET /stats` | Landing page hero |
+| `usePublicMapReports` | `GET /publik/peta` | Landing page peta |
 
-# Database MySQL (via Laragon)
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=swara_db
-DB_USERNAME=root
-DB_PASSWORD=
+### Penting: Hook Publik vs Berautentikasi
 
-# JWT Authentication
-JWT_SECRET=VzQCcvbQMllqsYHjXuT5nsGkK2gNTIqGgNgmAVGp796VseTVDRfnRFWlpW05d3MT
-JWT_TTL=1440           # Token berlaku 24 jam
-JWT_REFRESH_TTL=20160  # Refresh token berlaku 14 hari
+Hook yang diawali `usePublic` menggunakan `fetch()` biasa **tanpa token** — dipakai di landing page yang bisa diakses siapa saja.
 
-# Cloudinary (penyimpanan foto laporan)
-CLOUDINARY_CLOUD_NAME=dkqeyc6eo
-CLOUDINARY_API_KEY=596367781669349
-CLOUDINARY_API_SECRET=oVzpyoTxCuh0jddvjK7Ay00cpQw
-
-# Firebase Cloud Messaging (push notification)
-FIREBASE_PROJECT_ID=swara-mi-2026
-
-# CORS — izinkan frontend mengakses backend
-# Sudah diatur di config/cors.php: allowed_origins = ['http://localhost:3000']
-```
+Hook lainnya menggunakan Axios instance (`api.ts`) yang **otomatis menyertakan Bearer token** dari localStorage — hanya bisa dipakai di halaman yang sudah login.
 
 ---
 
-## 11. API Endpoints
+## 8. Troubleshooting
 
-### Public (Tanpa Token)
+### Halaman putih / blank setelah login
 
-| Method | Endpoint | Keterangan |
-|---|---|---|
-| `POST` | `/api/auth/register` | Registrasi akun baru |
-| `POST` | `/api/auth/login` | Login, return JWT token |
-| `POST` | `/api/auth/google` | Login via Google OAuth |
-| `GET` | `/api/kategori` | Daftar semua kategori aktif |
-| `GET` | `/api/kategori/{id}` | Detail satu kategori |
-| `GET` | `/api/stats` | Statistik publik (total laporan, completion rate) |
-| `GET` | `/api/publik/peta` | Data laporan untuk peta landing page |
+Cek apakah `AuthGuard` sudah membaca role dengan benar. Pastikan backend mengembalikan `role: "user"` atau `role: "admin"` (huruf kecil).
 
-### Protected (Wajib Bearer Token)
+### Peta tidak muncul (blank)
 
-**Autentikasi:**
-
-| Method | Endpoint | Keterangan |
-|---|---|---|
-| `GET` | `/api/auth/me` | Data user yang sedang login |
-| `POST` | `/api/auth/logout` | Logout, invalidate token |
-| `POST` | `/api/auth/refresh` | Refresh JWT token |
-
-**Laporan:**
-
-| Method | Endpoint | Keterangan |
-|---|---|---|
-| `GET` | `/api/laporan` | Daftar laporan (support filter & pagination) |
-| `POST` | `/api/laporan` | Buat laporan baru (multipart/form-data) |
-| `GET` | `/api/laporan/riwayat` | Riwayat laporan milik user sendiri |
-| `GET` | `/api/laporan/{id}` | Detail satu laporan |
-| `PUT` | `/api/laporan/{id}` | Edit laporan (hanya status tersubmit) |
-| `DELETE` | `/api/laporan/{id}` | Hapus laporan (soft delete) |
-| `PUT` | `/api/laporan/{id}/verifikasi` | Verifikasi laporan — admin only |
-
-**Notifikasi:**
-
-| Method | Endpoint | Keterangan |
-|---|---|---|
-| `GET` | `/api/notifikasi` | Daftar notifikasi user |
-| `PUT` | `/api/notifikasi/read-all` | Tandai semua sudah dibaca |
-| `PUT` | `/api/notifikasi/{id}/read` | Tandai satu notifikasi dibaca |
-| `DELETE` | `/api/notifikasi/{id}` | Hapus notifikasi |
-
-**Profil:**
-
-| Method | Endpoint | Keterangan |
-|---|---|---|
-| `GET` | `/api/profil` | Data profil user |
-| `PUT` | `/api/profil` | Update nama, email, no_telp |
-| `POST` | `/api/profil/foto` | Upload foto profil |
-| `PUT` | `/api/profil/password` | Ubah password |
-
-**Admin:**
-
-| Method | Endpoint | Keterangan |
-|---|---|---|
-| `GET` | `/api/admin/users` | Daftar semua pengguna |
-| `POST` | `/api/admin/broadcast` | Broadcast notifikasi ke semua user |
-
----
-
-## 12. Troubleshooting
-
-### Backend tidak bisa diakses (http://127.0.0.1:8000)
-
-**Penyebab & solusi:**
-- Pastikan Laragon sudah running (MySQL harus aktif)
-- Jalankan ulang: `php artisan serve`
-- Cek apakah port 8000 dipakai program lain: `netstat -an | findstr 8000`
-- Coba port lain: `php artisan serve --port=8001` lalu update `.env.local` frontend
-
-### Frontend error "Failed to fetch" atau CORS error
-
-**Solusi:**
-1. Pastikan backend sudah berjalan di `http://127.0.0.1:8000`
-2. Cek `config/cors.php` — `allowed_origins` harus berisi `http://localhost:3000`
-3. Setelah ubah CORS, jalankan: `php artisan config:clear`
-
-### Database: "SQLSTATE: Access denied"
-
-**Solusi:**
-- Cek username & password MySQL di `.env` backend
-- Default Laragon: `DB_USERNAME=root`, `DB_PASSWORD=` (kosong)
-
-### Migration error: "Table already exists"
-
-**Solusi:**
-```bash
-php artisan migrate:fresh --seed
-```
-> ⚠️ Perintah ini akan **menghapus semua data** dan membuat ulang dari awal.
-
-### "Invalid api_key" saat upload foto
-
-**Penyebab:** Ada spasi di `.env` pada baris `CLOUDINARY_API_KEY`.
-
-**Solusi:** Buka `.env` backend, pastikan:
-```env
-CLOUDINARY_API_KEY=596367781669349
-# Bukan:
-CLOUDINARY_API_KEY= 596367781669349  ← ada spasi, ini salah!
-```
-
-### Peta tidak muncul (blank/error)
-
-**Penyebab:** React Leaflet tidak bisa di-render di server (SSR).
-
-**Solusi:** Pastikan komponen peta di-import dengan `dynamic` dan `ssr: false`:
+React Leaflet tidak mendukung SSR. Pastikan import peta menggunakan:
 ```tsx
 const MapComponent = dynamic(() => import('@/components/MapComponent'), {
   ssr: false,
 })
 ```
 
-### Token expired — user terpaksa login ulang terus
+### "Failed to fetch" / CORS error di console
 
-**Solusi:** Cek nilai `JWT_TTL` di `.env` backend. Nilai `1440` = 24 jam. Naikkan sesuai kebutuhan.
+- Pastikan backend sudah berjalan: `php artisan serve`
+- Pastikan URL di `.env.local` benar: `NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api`
+- Pastikan `config/cors.php` di backend mengizinkan `http://localhost:3000`
 
-### npm install gagal / node_modules error
+### Foto profil / laporan tidak muncul
 
-**Solusi:**
+- Foto disimpan di Cloudinary — pastikan konfigurasi Cloudinary di `.env` backend benar
+- Pastikan tidak ada spasi di `CLOUDINARY_API_KEY`
+
+### Kategori tidak muncul di form laporan
+
+- Pastikan tabel `report_categories` sudah terisi (jalankan `php artisan db:seed`)
+- Pastikan kolom `is_active = 1` untuk kategori yang ingin ditampilkan
+
+### Error TypeScript saat `npm run dev`
+
 ```bash
-# Hapus node_modules dan package-lock.json
-rm -rf node_modules package-lock.json
+# Hapus cache TypeScript
+rm -rf .next
+npm run dev
+```
 
-# Install ulang
+### `npm install` gagal
+
+```bash
+# Hapus node_modules dan install ulang
+rm -rf node_modules package-lock.json
 npm install
 ```
 
-### `php artisan` tidak dikenali di terminal
+### Perubahan kode tidak terlihat di browser
 
-**Penyebab:** PHP belum ditambahkan ke PATH sistem.
-
-**Solusi:**
-1. Buka Laragon → Menu → PHP → Add PHP to Path
-2. Restart terminal
-3. Cek: `php --version`
+Next.js seharusnya hot-reload otomatis. Jika tidak:
+1. Tekan `Ctrl+C` di terminal untuk stop server
+2. Jalankan ulang: `npm run dev`
+3. Hard refresh browser: `Ctrl+Shift+R`
 
 ---
 
 ## 📝 Catatan Penting untuk Developer
 
-- **Jangan commit** file `.env` dan `.env.local` ke Git — keduanya berisi credential sensitif
-- **UUID** — semua `id` di tabel `users` dan `reports` adalah UUID string, bukan integer
-- **Kolom non-standard** di tabel `users`: `nama` (bukan `name`), `password_hash` (bukan `password`), `no_telp`, `foto`
-- **Status laporan** yang valid: `tersubmit`, `diverifikasi`, `diproses`, `selesai`, `ditolak` — kata `urgent` bukan status, melainkan field `is_urgent: boolean` terpisah
-- **Icon kategori** (`icon_url`) berisi URL gambar dari Cloudinary, bukan nama icon Lucide — render dengan `<img>`, bukan komponen icon
-- **Format tanggal** dari backend: `"10 Mei 2025 14:30"` (bukan ISO 8601) — gunakan fungsi `parseBackendDate()` sebelum diproses dengan library tanggal
-- **Soft delete** — laporan yang dihapus tidak benar-benar terhapus dari DB, statusnya diubah ke `ditolak` dan kolom `deleted_at` diisi
+- **Jangan commit** `.env.local` ke Git — berisi URL API yang bisa berbeda di tiap komputer
+- **UUID** — semua `id` dari backend adalah UUID string, bukan integer — jangan pakai `parseInt()`
+- **Format tanggal** dari backend: `"10 Mei 2025 14:30"` (bukan ISO) — gunakan `parseBackendDate()` sebelum diproses library tanggal
+- **`icon_url` kategori** — berisi URL gambar Cloudinary, bukan nama icon Lucide — selalu render dengan `<img>`, bukan komponen icon
+- **Status laporan** yang valid: `tersubmit`, `diverifikasi`, `diproses`, `selesai`, `ditolak` — `urgent` bukan status, melainkan field `is_urgent: boolean` terpisah
+- **React Leaflet** — wajib `dynamic import` dengan `ssr: false` untuk semua komponen peta
+- **`refreshUser()`** — panggil ini (bukan `initAuth`) setelah update profil atau foto agar data user di seluruh aplikasi ikut terupdate
 
 ---
 
-*Dokumentasi ini dibuat untuk proyek SWARA — Tugas Akhir D4 Manajemen Informatika.*
+*SWARA — Tugas Akhir D4 Manajemen Informatika, Universitas Negeri Surabaya*
