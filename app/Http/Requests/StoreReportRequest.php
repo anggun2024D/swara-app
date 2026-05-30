@@ -20,6 +20,7 @@ class StoreReportRequest extends FormRequest
             'latitude'     => 'required|numeric|between:-90,90',
             'longitude'    => 'required|numeric|between:-180,180',
             'address'      => 'nullable|string|max:255',
+            'priority'     => 'nullable|in:rendah,sedang,tinggi,urgent',
             'images'       => 'required|array|min:1|max:5',
             'images.*'     => 'required|image|mimes:jpg,jpeg,png|max:5120',
             'is_confirmed' => 'required|accepted',

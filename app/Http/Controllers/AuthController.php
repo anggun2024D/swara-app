@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use Kreait\Firebase\Factory;
 
 class AuthController extends Controller
 {
@@ -19,10 +19,15 @@ class AuthController extends Controller
             'password' => 'required|min:6|confirmed',
         ]);
 
+        // Ambil role_id untuk "user"
+        $userRole = DB::table('roles')->where('name', 'user')->first();
+
         $user = User::create([
-            'nama'     => $request->nama,
-            'email'    => $request->email,
-            'password' => bcrypt($request->password),
+            'nama'          => $request->nama,
+            'email'         => $request->email,
+            'password_hash' => bcrypt($request->password),
+            'role_id'       => $userRole->id,  // ← tambah ini
+            'is_active'     => true,            // ← tambah ini
         ]);
 
         $token = JWTAuth::fromUser($user);
@@ -30,7 +35,12 @@ class AuthController extends Controller
         return response()->json([
             'status'  => 'success',
             'message' => 'Registrasi berhasil',
-            'data'    => ['token' => $token, 'user' => $user],
+            'data'    => [
+                'token'      => $token,
+                'token_type' => 'bearer',
+                'expires_in' => config('jwt.ttl') * 60,
+                'user'       => $this->formatUser($user),
+            ],
         ], 201);
     }
 
@@ -42,21 +52,29 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $credentials = $request->only('email', 'password');
+        // ← TIDAK bisa pakai JWTAuth::attempt() karena kolom = password_hash
+        $user = User::where('email', $request->email)
+                    ->where('is_active', true)
+                    ->first();
 
-        if (!$token = JWTAuth::attempt($credentials)) {
+        if (!$user || !Hash::check($request->password, $user->password_hash)) {
             return response()->json([
                 'status'  => 'error',
                 'message' => 'Email atau password salah',
             ], 401);
         }
 
-        $user = JWTAuth::user();
+        $token = JWTAuth::fromUser($user);
 
         return response()->json([
             'status'  => 'success',
             'message' => 'Login berhasil',
-            'data'    => ['token' => $token, 'user' => $user],
+            'data'    => [
+                'token'      => $token,
+                'token_type' => 'bearer',
+                'expires_in' => config('jwt.ttl') * 60,
+                'user'       => $this->formatUser($user),
+            ],
         ]);
     }
 
@@ -71,44 +89,43 @@ class AuthController extends Controller
         ]);
     }
 
-    // ─── PROFILE ──────────────────────────────────────────────────
-    public function profile()
+    // ─── PROFILE / ME ─────────────────────────────────────────────
+    public function me()
     {
-        $user = JWTAuth::user();
+        $user = JWTAuth::parseToken()->authenticate();
 
         return response()->json([
             'status' => 'success',
-            'data'   => $user,
+            'data'   => $this->formatUser($user),
         ]);
     }
 
-    // ─── GOOGLE LOGIN (tanpa kreait/laravel-firebase) ─────────────
-    public function googleLogin(Request $request)
+    // ─── REFRESH TOKEN ────────────────────────────────────────────
+    public function refresh()
     {
-        // $request->validate(['id_token' => 'required|string']);
+        $token = JWTAuth::refresh(JWTAuth::getToken());
 
-        try {
-            $response = \Illuminate\Support\Facades\Http::get(
-                'https://oauth2.googleapis.com/tokeninfo',
-                ['id_token' => $request->id_token]
-            );
+        return response()->json([
+            'status' => 'success',
+            'data'   => ['token' => $token],
+        ]);
+    }
 
-            $googleData = $response->json();
-
-            // Langsung return data untuk debug
-            return response()->json([
-                'status'      => 'debug',
-                'google_data' => $googleData,
-                'response_status' => $response->status(),
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
-            ], 500);
-        }
+    // ─── FORMAT USER (konsisten ke frontend) ──────────────────────
+    private function formatUser(User $user): array
+    {
+        return [
+            'id'     => $user->id,                      // UUID string
+            'name'   => $user->nama,                    // map nama → name
+            'email'  => $user->email,
+            'role'   => $user->role?->name ?? 'user',   // dari relasi
+            'phone'  => $user->no_telp,                 // map no_telp → phone
+            'avatar' => $user->foto
+                            ? asset('storage/' . $user->foto)
+                            : null,
+            'is_active'  => $user->is_active,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+        ];
     }
 }

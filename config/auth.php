@@ -37,18 +37,19 @@ return [
     |
     */
 
-    'guards' => [
-    'web' => [
-        'driver' => 'session',
-        'provider' => 'users',
+    'providers' => [
+        'users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User::class,
+        ],
     ],
 
-    // ← tambahkan ini
-    'api' => [
-        'driver' => 'jwt',
-        'provider' => 'users',
+    'guards' => [
+        'api' => [
+            'driver' => 'jwt',        // ganti dari 'sanctum' atau 'token'
+            'provider' => 'users',
+        ],
     ],
-],
 
     /*
     |--------------------------------------------------------------------------

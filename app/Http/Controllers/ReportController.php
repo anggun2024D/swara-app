@@ -46,6 +46,7 @@ class ReportController extends Controller
             'latitude'    => $request->latitude,
             'longitude'   => $request->longitude,
             'address'     => $request->address,
+            'priority'    => $request->priority,
             'status'      => 'tersubmit',
         ]);
 
@@ -76,38 +77,35 @@ class ReportController extends Controller
         $report->load(['user', 'category', 'images']);
 
         // ── NOTIFIKASI ──────────────────────────────────────
-        $fcm = new FCMService();
+        try {
+            $fcm = new FCMService();
 
-        // 1. Notif ke PEMBUAT LAPORAN — konfirmasi laporan diterima
-        $pembuat = Auth::user();
-        if ($pembuat->fcm_token) {
-            $fcm->sendToToken(
-                token: $pembuat->fcm_token,
-                title: '✅ Laporan Berhasil Dikirim',
-                body:  "Laporan \"{$report->judul}\" kamu sudah kami terima dan sedang diproses.",
-                data:  [
-                    'type'      => 'laporan_dibuat',
-                    'report_id' => (string) $report->id,
-                ]
-            );
-        }
+            $pembuat = Auth::user();
+            if ($pembuat->fcm_token) {
+                $fcm->sendToToken(
+                    token: $pembuat->fcm_token,
+                    title: '✅ Laporan Berhasil Dikirim',
+                    body:  "Laporan \"{$report->judul}\" kamu sudah kami terima.",
+                    data:  ['type' => 'laporan_dibuat', 'report_id' => (string) $report->id]
+                );
+            }
 
-        // 2. Broadcast ke SEMUA USER LAIN — ada laporan baru
-        $tokens = User::where('id', '!=', Auth::id())
-            ->whereNotNull('fcm_token')
-            ->pluck('fcm_token')
-            ->toArray();
+            $tokens = User::where('id', '!=', Auth::id())
+                ->whereNotNull('fcm_token')
+                ->pluck('fcm_token')
+                ->toArray();
 
-        if (!empty($tokens)) {
-            $fcm->sendToMultiple(
-                tokens: $tokens,
-                title:  '📢 Laporan Baru',
-                body:   "{$pembuat->nama} membuat laporan baru: \"{$report->judul}\"",
-                data:   [
-                    'type'      => 'laporan_baru',
-                    'report_id' => (string) $report->id,
-                ]
-            );
+            if (!empty($tokens)) {
+                $fcm->sendToMultiple(
+                    tokens: $tokens,
+                    title:  '📢 Laporan Baru',
+                    body:   "{$pembuat->nama} membuat laporan: \"{$report->judul}\"",
+                    data:   ['type' => 'laporan_baru', 'report_id' => (string) $report->id]
+                );
+            }
+        } catch (\Exception $fcmError) {
+            // FCM gagal tidak boleh cancel laporan yang sudah tersimpan
+            \Log::warning('FCM notification failed: ' . $fcmError->getMessage());
         }
         // ────────────────────────────────────────────────────
 
@@ -122,7 +120,7 @@ class ReportController extends Controller
         DB::rollBack();
         return $this->response(
             false,
-            'Laporan gagal dikirim',
+            'Laporan gagal dikirim: ' . $e->getMessage(),
             null,
             500
         );
@@ -167,7 +165,26 @@ class ReportController extends Controller
             );
         }
 
-        $reports = $query->paginate(10);
+        $perHalaman = $request->input('per_halaman');
+        $reports = $perHalaman === 'all'
+            ? $query->get()          // return Collection, bukan Paginator
+            : $query->paginate((int) $perHalaman ?: 10);
+
+        if ($perHalaman === 'all') {
+        return $this->response(
+                true,
+                'Daftar laporan berhasil dimuat',
+                [
+                    'laporan'    => ReportResource::collection($reports),
+                    'pagination' => [
+                        'total'         => $reports->count(),
+                        'per_halaman'   => $reports->count(),
+                        'halaman_ini'   => 1,
+                        'total_halaman' => 1,
+                    ]
+                ]
+            );
+        }
 
         return $this->response(
             true,
@@ -380,4 +397,76 @@ public function update(Request $request, string $id)
         return $this->response(false, 'Gagal membatalkan: ' . $e->getMessage(), null, 500);
     }
 }
+
+    // ================================
+    // 7. VERIFIKASI LAPORAN (ADMIN)
+    // PUT /api/laporan/{id}/verifikasi
+    // ================================
+    public function verifikasi(Request $request, string $id)
+    {
+        $report = Report::find($id);
+
+        if (!$report) {
+            return $this->response(false, 'Laporan tidak ditemukan', null, 404);
+        }
+
+        $request->validate([
+            'status'       => 'required|in:diverifikasi,diproses,selesai,ditolak',
+            'admin_notes'  => 'nullable|string|max:500',
+        ]);
+
+        $report->update([
+            'status'      => $request->status,
+            'admin_notes' => $request->admin_notes,
+        ]);
+
+        $report->load(['user', 'category', 'images']);
+
+        return $this->response(
+            true,
+            'Status laporan berhasil diperbarui',
+            new ReportResource($report)
+        );
+    }
+
+    /**
+     * Data peta untuk landing page — publik, tanpa auth
+     * Hanya return field minimal yang dibutuhkan peta
+     */
+    public function petaPublik()
+    {
+        $laporan = Report::with(['category'])
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->whereIn('status', ['tersubmit', 'diverifikasi', 'diproses', 'selesai'])
+            ->select([
+                'id', 'judul', 'status', 'is_urgent',
+                'latitude', 'longitude', 'address',
+                'category_id'
+            ])
+            ->latest()
+            ->get();
+
+        $data = $laporan->map(fn($r) => [
+            'id'        => $r->id,
+            'judul'     => $r->judul,
+            'status'    => $r->status,
+            'is_urgent' => (bool) $r->is_urgent,
+            'lokasi'    => [
+                'latitude'  => $r->latitude,
+                'longitude' => $r->longitude,
+                'address'   => $r->address,
+            ],
+            'category' => [
+                'id'   => $r->category?->id,
+                'nama' => $r->category?->name,
+            ],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $data,
+        ]);
+    }
+
 }

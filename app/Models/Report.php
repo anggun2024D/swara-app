@@ -26,6 +26,9 @@ class Report extends Model
         'address',
         'status',
         'priority',
+        'is_urgent',
+        'admin_notes',
+        'view_count',
     ];
 
     // Otomatis generate UUID

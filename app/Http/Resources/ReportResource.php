@@ -34,9 +34,11 @@ class ReportResource extends JsonResource
                 ];
             }),
             'dibuat_pada'   => $this->created_at
-                                    ->format('d M Y H:i'),
+                       ->setTimezone('Asia/Jakarta')
+                       ->translatedFormat('d M Y H:i'),
             'diupdate_pada' => $this->updated_at
-                                    ->format('d M Y H:i'),
+                       ->setTimezone('Asia/Jakarta')
+                       ->translatedFormat('d M Y H:i'),
         ];
     }
 }

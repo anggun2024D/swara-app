@@ -18,6 +18,8 @@ class Notification extends Model
         'title',
         'message',
         'is_read',
+        'is_broadcast',
+        'target_role',
     ];
 
     protected function casts(): array
