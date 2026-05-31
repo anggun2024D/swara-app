@@ -141,42 +141,6 @@ export default function AnalyticsPage() {
           </motion.div>
         )}
 
-        {/* Kinerja Kecamatan */}
-        {isLoading ? <SkeletonCard /> : (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-            className="bg-white rounded-2xl p-5 shadow-sm border border-border"
-          >
-            <h3 className="font-bold mb-1">Kinerja Kecamatan</h3>
-            <p className="text-xs text-muted mb-4">{kecamatan.length} kecamatan tercatat</p>
-            {kecamatan.length === 0 ? (
-              <div className="h-[300px] flex items-center justify-center text-muted text-sm">
-                Belum ada data kecamatan
-              </div>
-            ) : (
-              <div className="space-y-4 pt-2">
-                {kecamatan.map((k, idx) => (
-                  <div key={k.nama}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="font-medium">{k.nama}</span>
-                      <span className="text-muted">{k.total} laporan</span>
-                    </div>
-                    <div className="h-2 bg-gray-100 rounded-full">
-                      <motion.div
-                        className="h-full rounded-full"
-                        style={{ backgroundColor: CATEGORY_COLORS[idx % CATEGORY_COLORS.length] }}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(k.total / maxLaporan) * 100}%` }}
-                        transition={{ duration: 0.8, delay: idx * 0.05 }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </motion.div>
-        )}
-
       </div>
     </div>
   )

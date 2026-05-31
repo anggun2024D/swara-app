@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Search, Bell, Zap, FileText, Users, MapPin, X } from 'lucide-react'
+import { Search, FileText, Users, MapPin, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
@@ -180,17 +180,6 @@ export default function AdminTopbar() {
 
       {/* Right Section */}
       <div className="flex items-center gap-3">
-        {/* Real-time indicator */}
-        <div className="hidden sm:flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full">
-          <Zap size={12} className="text-green-600" />
-          <span className="text-xs font-semibold text-green-700">Live</span>
-        </div>
-
-        {/* Notifikasi */}
-        <button className="relative p-2 rounded-lg hover:bg-bg transition-colors">
-          <Bell size={18} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
-        </button>
 
         {/* Admin Info */}
         <div className="flex items-center gap-2 pl-2 border-l border-border">

@@ -59,13 +59,6 @@ export default function PetaPage() {
             className="flex-1 text-sm outline-none bg-transparent placeholder:text-muted"
           />
         </div>
-        <button
-          onClick={() => {/* bisa buka filter modal */}}
-          className="bg-white rounded-2xl shadow-lg px-4 flex items-center gap-2 text-sm font-semibold text-text hover:bg-gray-50 transition"
-        >
-          <Filter size={16} />
-          <span className="hidden sm:inline">Kategori</span>
-        </button>
       </div>
 
       {/* ── Status filter pills ── */}

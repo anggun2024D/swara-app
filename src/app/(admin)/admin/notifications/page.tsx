@@ -249,7 +249,7 @@ export default function NotificationsPage() {
         </div>
 
         {/* Ringkasan */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-border">
+        {/* <div className="bg-white rounded-2xl p-5 shadow-sm border border-border">
           <h3 className="font-bold mb-3">Ringkasan</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
@@ -265,7 +265,7 @@ export default function NotificationsPage() {
               <span className="font-medium">{notifikasi.length - belumDibaca}</span>
             </div>
           </div>
-        </div>
+        </div> */}
 
       </div>
     </div>

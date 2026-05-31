@@ -14,6 +14,18 @@ export interface AdminUser {
   bergabung_pada: string
 }
 
+export interface AdminUserDetail {
+  id: string
+  nama: string
+  email: string
+  no_telp: string | null
+  foto: string | null
+  role: 'user' | 'admin'
+  is_active: boolean
+  total_laporan: number
+  bergabung_pada: string
+}
+
 export interface UserFilters {
   search?: string
   role?: 'user' | 'admin' | ''
@@ -49,6 +61,11 @@ export const usersService = {
     const res = await api.get<{ success: boolean; data: UsersResponse }>(
       `/admin/users?${params.toString()}`
     )
+    return res.data.data
+  },
+
+  getUserById: async (id: string): Promise<AdminUserDetail> => {
+    const res = await api.get(`/admin/users/${id}`)
     return res.data.data
   },
 }

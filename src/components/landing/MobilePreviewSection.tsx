@@ -43,10 +43,6 @@ export default function MobilePreviewSection() {
                 <Smartphone className="w-4 h-4 text-white" />
                 <span className="text-white text-xs font-semibold">App Store</span>
               </div>
-              <div className="bg-black rounded-xl px-4 py-2 flex items-center gap-2">
-                <Smartphone className="w-4 h-4 text-white" />
-                <span className="text-white text-xs font-semibold">Google Play</span>
-              </div>
             </div>
           </motion.div>
 

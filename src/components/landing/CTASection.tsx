@@ -1,53 +1,91 @@
 'use client'
-
+ 
 import { motion } from 'framer-motion'
-import { ArrowRight, MapPin } from 'lucide-react'
+import { ArrowRight, MapPin, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
-
+ 
 export default function CTASection() {
   return (
-    <section className="relative py-24 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-hover"></div>
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1600&h=400&fit=crop')] bg-cover bg-center opacity-10"></div>
-      
+    <section className="relative py-28 overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-hover to-emerald-900" />
+ 
+      {/* Wave top */}
+      <div className="absolute top-0 left-0 right-0">
+        <svg viewBox="0 0 1440 80" fill="none" className="w-full" preserveAspectRatio="none">
+          <path d="M0,0 C360,80 1080,80 1440,0 L1440,0 L0,0 Z" fill="#f5f7f9"/>
+        </svg>
+      </div>
+ 
+      {/* Decorations */}
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
+        className="absolute -top-24 -right-24 w-96 h-96 rounded-full border border-white/10"
+      />
+      <motion.div
+        animate={{ rotate: -360 }}
+        transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
+        className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full border-2 border-white/5"
+      />
+      <div className="absolute top-20 right-20 w-32 h-32 rounded-full bg-gold/10 blur-2xl" />
+      <div className="absolute bottom-20 left-20 w-40 h-40 rounded-full bg-emerald-300/10 blur-2xl" />
+ 
       <div className="relative z-10 container-premium text-center text-white">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl md:text-5xl font-extrabold max-w-3xl mx-auto">
-            Bersama Wujudkan Infrastruktur Lamongan yang Lebih Baik
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-4 py-2 mb-8">
+            <div className="w-2 h-2 bg-gold rounded-full animate-pulse" />
+            <span className="text-sm font-medium">Bergabunglah dengan ribuan warga Lamongan</span>
+          </div>
+ 
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold max-w-3xl mx-auto leading-tight mb-6" style={{fontFamily:'Plus Jakarta Sans, sans-serif'}}>
+            Laporkan Masalah di
+            <span className="text-gold"> Sekitarmu</span>
+            <br />Sekarang
           </h2>
-          <p className="text-white/80 text-lg max-w-2xl mx-auto mt-4">
-            Setiap laporan Anda adalah langkah menuju perubahan nyata.
+ 
+          <p className="text-white/70 text-lg max-w-xl mx-auto mb-4">
+            Setiap laporan Anda adalah kontribusi nyata untuk infrastruktur Kabupaten Lamongan yang lebih baik.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+ 
+          {/* Feature pills */}
+          <div className="flex flex-wrap justify-center gap-3 mb-10">
+            {['Gratis & Mudah', 'GPS Otomatis', 'Diproses Cepat', 'Transparan'].map((f) => (
+              <div key={f} className="flex items-center gap-1.5 bg-white/10 border border-white/15 rounded-full px-3 py-1.5 text-sm">
+                <CheckCircle size={13} className="text-gold" />
+                {f}
+              </div>
+            ))}
+          </div>
+ 
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/laporan">
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-3 bg-gold text-amber-900 font-bold rounded-full shadow-lg hover:bg-amber-500 transition-all flex items-center gap-2 mx-auto"
+                whileHover={{ scale: 1.04, y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                className="flex items-center gap-2 px-8 py-4 bg-gold text-amber-950 font-bold rounded-2xl shadow-xl hover:bg-amber-400 transition-all text-base mx-auto"
               >
-                Mulai Lapor <ArrowRight size={18} />
+                Mulai Lapor Sekarang <ArrowRight size={18} />
               </motion.button>
             </Link>
-            <Link href="#map">
+            <a href="#map">
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-3 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-full border border-white/30 hover:bg-white/30 transition-all flex items-center gap-2 mx-auto"
+                whileHover={{ scale: 1.04, y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                className="flex items-center gap-2 px-8 py-4 bg-white/15 backdrop-blur-sm text-white font-semibold rounded-2xl border border-white/25 hover:bg-white/25 transition-all text-base mx-auto"
               >
-                Jelajahi Peta <MapPin size={18} />
+                <MapPin size={18} /> Lihat Peta
               </motion.button>
-            </Link>
+            </a>
           </div>
         </motion.div>
       </div>
-
-      {/* Floating particles */}
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black/20 to-transparent"></div>
     </section>
   )
 }

@@ -1,14 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { MapPin, CheckCircle, Clock, Users } from 'lucide-react'
 import Link from 'next/link'
-
-const floatingCards = [
-  { icon: CheckCircle, text: 'Laporan Selesai', subtext: 'Jalan Rusak Diperbaiki', color: 'text-green-500' },
-  { icon: Clock, text: 'Diproses', subtext: 'Lampu Jalan Mati', color: 'text-yellow-500' },
-  { icon: Users, text: 'Warga Aktif', subtext: '1,284 laporan', color: 'text-primary' },
-]
+import Image from 'next/image'
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -22,11 +16,20 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm">
-              <MapPin className="w-5 h-5 text-gold" />
+          <Link href="/" className="flex items-center gap-1">
+            <div className="relative w-14 h-14 flex-shrink-0">
+              <Image
+                src="/logo.png"
+                alt="SWARA Logo"
+                fill
+                priority
+                className="object-contain"
+              />
             </div>
-            <span className="text-2xl font-extrabold text-white tracking-wide">SWARA</span>
+
+            <span className="text-4xl font-extrabold text-white tracking-tight">
+              WARA
+            </span>
           </Link>
 
           {/* Main Content */}
@@ -47,28 +50,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             >
               Sampaikan aspirasi dan keluhan Anda langsung ke pemerintah daerah melalui platform digital yang transparan.
             </motion.p>
-          </div>
-
-          {/* Floating Cards */}
-          <div className="space-y-3">
-            {floatingCards.map((card, idx) => (
-              <motion.div
-                key={card.text}
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + idx * 0.1 }}
-                whileHover={{ x: 5 }}
-                className="bg-white/10 backdrop-blur-md rounded-xl p-3 flex items-center gap-3 w-64"
-              >
-                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                  <card.icon className={`w-4 h-4 ${card.color}`} />
-                </div>
-                <div>
-                  <p className="text-white text-sm font-semibold">{card.text}</p>
-                  <p className="text-white/60 text-xs">{card.subtext}</p>
-                </div>
-              </motion.div>
-            ))}
           </div>
 
           <div className="text-white/40 text-xs">

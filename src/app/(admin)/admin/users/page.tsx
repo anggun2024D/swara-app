@@ -7,6 +7,7 @@ import {
   ChevronLeft, ChevronRight, RefreshCw,
 } from 'lucide-react'
 import { useUsers } from '@/hooks/useUsers'
+import { useRouter } from 'next/navigation'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -50,6 +51,7 @@ function SkeletonRow() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function UsersPage() {
+  const router = useRouter()
   const [searchInput, setSearchInput] = useState('')
 
   const { users, pagination, isLoading, error, filters, setFilters, setPage, refetch } =
@@ -234,6 +236,7 @@ export default function UsersPage() {
                       {/* Aksi */}
                       <td className="px-4 py-3">
                         <button
+                          onClick={() => router.push(`/admin/users/${user.id}`)}
                           className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400
                             hover:text-gray-600 transition-colors"
                           title="Lihat detail"

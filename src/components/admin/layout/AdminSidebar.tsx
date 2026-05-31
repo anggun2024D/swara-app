@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import {
   LayoutDashboard,
@@ -11,7 +12,6 @@ import {
   Users,
   Bell,
   CheckSquare,
-  Settings,
   LogOut,
   Activity,
   Compass,
@@ -27,7 +27,6 @@ const menuItems = [
   { name: 'Verifikasi',      href: '/admin/verification',    icon: CheckSquare     },
   { name: 'Notifikasi',      href: '/admin/notifications',   icon: Bell            },
   { name: 'Pengguna',        href: '/admin/users',           icon: Users           },
-  { name: 'Pengaturan',      href: '/admin/settings',        icon: Settings        },
 ]
 
 export default function AdminSidebar({
@@ -47,19 +46,25 @@ export default function AdminSidebar({
       className="fixed left-0 top-0 h-screen bg-gradient-to-b from-[#0a2418] to-[#0f2f20] shadow-2xl z-50 flex flex-col"
     >
       {/* Logo */}
-      <div className="flex items-center justify-between px-5 py-6 border-b border-white/10">
-        <div className="flex items-center gap-2 overflow-hidden">
-          <div className="w-8 h-8 bg-gold rounded-lg flex items-center justify-center flex-shrink-0">
-            <Compass className="w-4 h-4 text-amber-900" />
+      <div className="flex items-center justify-between px-10 py-6 border-b border-white/10">
+        <div className="flex items-center gap-0 overflow-hidden">
+          <div className="relative w-11 h-11 flex-shrink-0">
+            <Image
+              src="/logo.png"
+              alt="SWARA Logo"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
           {!collapsed && (
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="font-extrabold text-xl text-white tracking-wide whitespace-nowrap"
+              className="font-extrabold text-[25px] text-white tracking-tight whitespace-nowrap leading-none"
             >
-              SWARA
+              WARA
             </motion.span>
           )}
         </div>

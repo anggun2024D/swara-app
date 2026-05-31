@@ -47,3 +47,58 @@
   background: transparent;
   border: none;
 }
+
+:root {
+  --primary: #14422d;
+  --primary-hover: #1b5a3d;
+  --primary-light: #e8f5ee;
+  --gold: #f5c400;
+  --bg: #f5f7f9;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+}
+
+.section-title {
+  @apply text-3xl md:text-4xl lg:text-5xl font-extrabold text-text leading-tight;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+ 
+.section-subtitle {
+  @apply text-base md:text-lg text-muted max-w-2xl mx-auto leading-relaxed;
+}
+ 
+.container-premium {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+ 
+.card-premium {
+  @apply bg-white rounded-3xl shadow-soft border border-border/60 transition-all duration-300;
+}
+ 
+.glass-card {
+  @apply bg-white/80 backdrop-blur-xl rounded-3xl border border-white/60 shadow-card;
+}
+ 
+.button-primary {
+  @apply px-6 py-3 bg-primary text-white font-semibold rounded-full hover:bg-primary-hover transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5;
+}
+ 
+.button-secondary {
+  @apply px-6 py-3 bg-white text-primary font-semibold rounded-full border-2 border-primary hover:bg-primary hover:text-white transition-all duration-200;
+}
+ 
+.section-wave-top {
+  position: relative;
+}
+.section-wave-top::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: inherit;
+  clip-path: ellipse(55% 100% at 50% 100%);
+}

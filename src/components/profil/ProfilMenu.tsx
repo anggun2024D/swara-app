@@ -44,7 +44,7 @@ export default function ProfilMenu() {
     } catch {
       // Lanjut logout meski API gagal
     }
-    logout()           // hapus token + user dari localStorage
+    logout()
     toast.success('Berhasil logout')
     router.push('/login')
   }

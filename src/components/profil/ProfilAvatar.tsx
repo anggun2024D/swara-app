@@ -45,7 +45,7 @@ export default function ProfilAvatar({ user }: { user: AuthUser | null }) {
     : '?'
 
   return (
-    <div className="card p-6 text-center bg-gradient-to-br from-primary to-primary-mid text-white rounded-2xl">
+    <div className="card p-6 text-center bg-primary text-white rounded-2xl">
       <div className="relative inline-block">
         <div className="w-24 h-24 rounded-full bg-white/20 border-4 border-white/30 mx-auto overflow-hidden flex items-center justify-center">
           {avatarSrc ? (

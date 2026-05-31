@@ -57,8 +57,8 @@ export default function ReportDetailDrawer({ report, open, onClose, onVerify }: 
             className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
           >
             {/* Header */}
-            <div className="p-5 border-b border-border flex justify-between items-center">
-              <h2 className="font-bold text-lg">Detail Laporan</h2>
+            <div className="p-5 border-b bg-primary flex justify-between items-center">
+              <h2 className="font-bold text-white">Detail Laporan</h2>
               <button onClick={onClose} className="p-1 rounded hover:bg-gray-100">
                 <X size={20} />
               </button>

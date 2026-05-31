@@ -115,7 +115,7 @@ function NotificationCard({
     >
       <div className="flex gap-3">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-          isLaporan ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'
+          isLaporan ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-primary'
         }`}>
           <Icon size={18} />
         </div>

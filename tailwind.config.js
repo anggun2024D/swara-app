@@ -23,6 +23,15 @@ module.exports = {
       fontFamily: {
         jakarta: ['Plus Jakarta Sans', 'sans-serif'],
       },
+      borderRadius: {
+      '4xl': '2rem',
+      '5xl': '2.5rem',
+      },
+      boxShadow: {
+        'soft': '0 4px 24px rgba(0,0,0,0.06)',
+        'card': '0 8px 32px rgba(20,66,45,0.10)',
+        'float': '0 20px 60px rgba(20,66,45,0.15)',
+      },
       animation: {
         'fade-up': 'fadeUp 0.5s ease-out',
         'slide-in': 'slideIn 0.4s cubic-bezier(0.22, 0.68, 0, 1.2)',
