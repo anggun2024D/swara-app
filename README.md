@@ -135,103 +135,103 @@ Setiap kali ingin membuka aplikasi, pastikan urutan ini benar:
 
 ```
 SWARA-Dashboard/
-├── public/                             ← File statis (logo, favicon, gambar)
+├── public/
 │   └── logo.png
 │
 ├── src/
-│   ├── app/                            ← Next.js App Router — semua halaman ada di sini
+│   ├── app/
+│   │   ├── (public)/
+│   │   │   ├── page.tsx
+│   │   │   ├── login/page.tsx
+│   │   │   └── register/page.tsx
 │   │   │
-│   │   ├── (public)/                   ← Halaman publik (tanpa layout dashboard)
-│   │   │   ├── page.tsx                ← Landing page → http://localhost:3000
-│   │   │   ├── login/page.tsx          ← Halaman login
-│   │   │   └── register/page.tsx       ← Halaman registrasi
-│   │   │
-│   │   ├── (dashboard)/                ← Dashboard user — wajib login sebagai "user"
-│   │   │   ├── layout.tsx              ← Layout: Sidebar + Topbar + AuthGuard role="user"
-│   │   │   ├── dashboard/page.tsx      ← Halaman utama dashboard user
-│   │   │   ├── laporan/page.tsx        ← Form buat laporan baru
-│   │   │   ├── peta/page.tsx           ← Peta interaktif fullscreen
+│   │   ├── (dashboard)/
+│   │   │   ├── layout.tsx
+│   │   │   ├── dashboard/page.tsx
+│   │   │   ├── laporan/page.tsx
+│   │   │   ├── peta/page.tsx
 │   │   │   ├── kategori/
-│   │   │   │   ├── page.tsx            ← Daftar semua kategori
-│   │   │   │   └── [id]/page.tsx       ← Laporan per kategori
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [id]/page.tsx
 │   │   │   ├── riwayat/
-│   │   │   │   ├── page.tsx            ← Riwayat laporan milik user
-│   │   │   │   └── [id]/page.tsx       ← Detail satu laporan
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [id]/page.tsx
 │   │   │   ├── profil/
-│   │   │   │   ├── page.tsx            ← Halaman profil
-│   │   │   │   └── edit/page.tsx       ← Edit profil & ubah password
-│   │   │   ├── notifikasi/page.tsx     ← Daftar notifikasi
-│   │   │   └── bantuan/page.tsx        ← Halaman bantuan & FAQ
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── edit/page.tsx
+│   │   │   ├── notifikasi/page.tsx
+│   │   │   └── bantuan/page.tsx
 │   │   │
-│   │   ├── (admin)/                    ← Dashboard admin — wajib login sebagai "admin"
-│   │   │   ├── layout.tsx              ← Layout: AdminSidebar + AdminTopbar + AuthGuard role="admin"
+│   │   ├── (admin)/
+│   │   │   ├── layout.tsx
 │   │   │   └── admin/
-│   │   │       ├── dashboard/page.tsx      ← Dashboard utama admin
-│   │   │       ├── reports/page.tsx        ← Manajemen laporan
-│   │   │       ├── analytics/page.tsx      ← Grafik & statistik
-│   │   │       ├── notifications/page.tsx  ← Manajemen notifikasi
-│   │   │       ├── users/page.tsx          ← Manajemen pengguna
-│   │   │       ├── map-monitoring/page.tsx ← Monitoring peta real-time
-│   │   │       ├── verification/page.tsx   ← Antrian verifikasi laporan
-│   │   │       └── settings/page.tsx       ← Pengaturan sistem
+│   │   │       ├── dashboard/page.tsx
+│   │   │       ├── reports/page.tsx
+│   │   │       ├── analytics/page.tsx
+│   │   │       ├── notifications/page.tsx
+│   │   │       ├── users/
+│   │   │       │   ├── page.tsx                ← Manajemen pengguna
+│   │   │       │   └── [id]/page.tsx           ← ✅ BARU — Detail pengguna
+│   │   │       ├── map-monitoring/page.tsx
+│   │   │       ├── verification/page.tsx
+│   │   │       └── settings/page.tsx
 │   │   │
-│   │   └── layout.tsx                  ← Root layout: AuthProvider + Toaster
+│   │   └── layout.tsx
 │   │
-│   ├── components/                     ← Semua komponen UI yang dapat digunakan ulang
+│   ├── components/
+│   │   ├── landing/
+│   │   │   ├── Navbar.tsx
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── CategorySection.tsx
+│   │   │   ├── GISMapSection.tsx
+│   │   │   ├── AnalyticsSection.tsx
+│   │   │   ├── FeaturesSection.tsx
+│   │   │   └── Footer.tsx
 │   │   │
-│   │   ├── landing/                    ← Komponen khusus landing page
-│   │   │   ├── Navbar.tsx              ← Navigasi atas (deteksi status login otomatis)
-│   │   │   ├── HeroSection.tsx         ← Hero + stats real-time dari API
-│   │   │   ├── CategorySection.tsx     ← Grid kategori layanan (real API)
-│   │   │   ├── GISMapSection.tsx       ← Peta publik dengan filter (real API)
-│   │   │   ├── AnalyticsSection.tsx    ← Statistik & grafik publik (real API)
-│   │   │   ├── FeaturesSection.tsx     ← Fitur-fitur unggulan
-│   │   │   └── Footer.tsx              ← Footer landing page
-│   │   │
-│   │   ├── layout/                     ← Layout komponen dashboard user
-│   │   │   ├── Sidebar.tsx             ← Sidebar navigasi user (ada tombol ke landing page)
-│   │   │   └── Topbar.tsx              ← Topbar: avatar, nama, notifikasi
+│   │   ├── layout/
+│   │   │   ├── Sidebar.tsx
+│   │   │   └── Topbar.tsx
 │   │   │
 │   │   ├── guards/
-│   │   │   └── AuthGuard.tsx           ← Proteksi route berdasarkan role user/admin
+│   │   │   └── AuthGuard.tsx
 │   │   │
-│   │   ├── MapComponent.tsx            ← Komponen peta Leaflet (SSR disabled)
+│   │   ├── MapComponent.tsx
 │   │   │
-│   │   ├── laporan/                    ← Komponen form buat laporan
-│   │   │   ├── LaporanForm.tsx         ← Form utama (geocoding + mini map + priority)
-│   │   │   ├── ImageUpload.tsx         ← Upload foto (max 5 foto, max 5MB per foto)
-│   │   │   ├── PreviewPanel.tsx        ← Preview data sebelum submit
-│   │   │   └── MiniMap.tsx             ← Peta kecil interaktif + reverse geocode
+│   │   ├── laporan/
+│   │   │   ├── LaporanForm.tsx
+│   │   │   ├── ImageUpload.tsx
+│   │   │   ├── PreviewPanel.tsx
+│   │   │   └── MiniMap.tsx
 │   │   │
 │   │   ├── peta/
-│   │   │   ├── PetaMap.tsx             ← Peta fullscreen dengan marker per kategori
-│   │   │   └── ReportDetailSidebar.tsx ← Sidebar detail laporan (slide dari kanan)
+│   │   │   ├── PetaMap.tsx
+│   │   │   └── ReportDetailSidebar.tsx
 │   │   │
 │   │   ├── kategori/
-│   │   │   ├── KategoriHero.tsx        ← Header halaman kategori
-│   │   │   └── KategoriCard.tsx        ← Card kategori (render icon_url sebagai <img>)
+│   │   │   ├── KategoriHero.tsx
+│   │   │   └── KategoriCard.tsx
 │   │   │
 │   │   ├── riwayat/
-│   │   │   ├── RiwayatCard.tsx         ← Card per laporan
-│   │   │   ├── RiwayatHeader.tsx       ← Header + search
-│   │   │   ├── RiwayatTabs.tsx         ← Tab filter: semua/tersubmit/diproses/selesai/ditolak
-│   │   │   └── RiwayatSidebar.tsx      ← Sidebar statistik riwayat
+│   │   │   ├── RiwayatCard.tsx
+│   │   │   ├── RiwayatHeader.tsx
+│   │   │   ├── RiwayatTabs.tsx
+│   │   │   └── RiwayatSidebar.tsx
 │   │   │
 │   │   ├── profil/
-│   │   │   ├── ProfilAvatar.tsx        ← Upload & tampil foto profil
-│   │   │   └── ProfilMenu.tsx          ← Menu profil + tombol logout
+│   │   │   ├── ProfilAvatar.tsx
+│   │   │   └── ProfilMenu.tsx
 │   │   │
-│   │   ├── dashboard/                  ← Widget dashboard user
-│   │   │   ├── HeroSection.tsx         ← Sambutan + statistik user
-│   │   │   ├── StatsCards.tsx          ← Kartu total/selesai/diproses laporan
-│   │   │   ├── CategoryGrid.tsx        ← Grid kategori (link ke /kategori/[id])
-│   │   │   ├── MapSection.tsx          ← Peta mini di dashboard
-│   │   │   └── UpdatesPanel.tsx        ← Panel update & notifikasi terbaru
+│   │   ├── dashboard/
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── StatsCards.tsx
+│   │   │   ├── CategoryGrid.tsx
+│   │   │   ├── MapSection.tsx
+│   │   │   └── UpdatesPanel.tsx
 │   │   │
-│   │   └── admin/                      ← Komponen khusus admin
+│   │   └── admin/
 │   │       ├── layout/
-│   │       │   ├── AdminSidebar.tsx    ← Sidebar admin dark theme (ada tombol ke landing page)
-│   │       │   └── AdminTopbar.tsx     ← Topbar admin + search fungsional
+│   │       │   ├── AdminSidebar.tsx
+│   │       │   └── AdminTopbar.tsx
 │   │       ├── dashboard/
 │   │       │   ├── WelcomeBanner.tsx
 │   │       │   ├── AnalyticsCards.tsx
@@ -247,53 +247,54 @@ SWARA-Dashboard/
 │   │       ├── map-monitoring/
 │   │       │   └── AdminMap.tsx
 │   │       └── reports/
-│   │           ├── ReportsTable.tsx        ← Tabel laporan dengan pagination
-│   │           ├── ReportsFilter.tsx       ← Filter + useSearchParams (sync dengan URL)
-│   │           └── ReportDetailDrawer.tsx  ← Drawer detail + verifikasi laporan
+│   │           ├── ReportsTable.tsx
+│   │           ├── ReportsFilter.tsx
+│   │           └── ReportDetailDrawer.tsx
 │   │
-│   ├── hooks/                          ← Custom React hooks (logika fetch data)
-│   │   ├── useAuth.ts                  ← State login, user, isAuthenticated
-│   │   ├── useReports.ts               ← Fetch laporan dengan filter (admin)
-│   │   ├── useRiwayat.ts               ← Riwayat laporan milik user sendiri
-│   │   ├── useAdminDashboard.ts        ← Semua metrics dashboard admin
-│   │   ├── useMapReports.ts            ← Data peta berautentikasi (auto-refresh 30 detik)
-│   │   ├── useUserReports.ts           ← Laporan semua user untuk peta
-│   │   ├── useUserDashboard.ts         ← Fetch paralel: riwayat + kategori + notifikasi
-│   │   ├── useVerification.ts          ← Antrian verifikasi laporan admin
-│   │   ├── useKategori.ts              ← Daftar kategori (public, tanpa token)
-│   │   ├── useNotifications.ts         ← Notifikasi dengan optimistic update
-│   │   ├── useAnalytics.ts             ← Data analitik admin
-│   │   ├── useUsers.ts                 ← Daftar pengguna (admin)
-│   │   ├── usePublicMapReports.ts      ← Data peta landing page (tanpa auth)
-│   │   └── usePublicStats.ts           ← Statistik publik landing page (tanpa auth)
+│   ├── hooks/
+│   │   ├── useAuth.ts
+│   │   ├── useReports.ts
+│   │   ├── useRiwayat.ts
+│   │   ├── useAdminDashboard.ts
+│   │   ├── useMapReports.ts
+│   │   ├── useUserReports.ts
+│   │   ├── useUserDashboard.ts
+│   │   ├── useVerification.ts
+│   │   ├── useKategori.ts
+│   │   ├── useNotifications.ts
+│   │   ├── useAnalytics.ts
+│   │   ├── useUsers.ts
+│   │   ├── useUserDetail.ts            ← ✅ BARU — Fetch detail satu pengguna
+│   │   ├── usePublicMapReports.ts
+│   │   └── usePublicStats.ts
 │   │
-│   ├── services/                       ← Layer pemanggilan API (Axios)
-│   │   ├── api.ts                      ← Axios instance + JWT interceptor otomatis
-│   │   ├── auth.service.ts             ← login(), register(), logout()
-│   │   ├── reports.service.ts          ← getReports(), createReport(), dll
-│   │   ├── categories.service.ts       ← getKategori()
-│   │   ├── notifications.service.ts    ← getNotifikasi(), markAsRead(), dll
-│   │   ├── analytics.service.ts        ← getAnalytics()
-│   │   ├── users.service.ts            ← getUsers() (admin)
-│   │   └── dashboard.service.ts        ← getDashboardData()
+│   ├── services/
+│   │   ├── api.ts
+│   │   ├── auth.service.ts
+│   │   ├── reports.service.ts
+│   │   ├── categories.service.ts
+│   │   ├── notifications.service.ts
+│   │   ├── analytics.service.ts
+│   │   ├── users.service.ts            ← ✅ UPDATE — tambah getUserById() + AdminUserDetail
+│   │   └── dashboard.service.ts
 │   │
 │   ├── contexts/
-│   │   └── AuthContext.tsx             ← Global state: user, isAuthenticated, login, logout, refreshUser
+│   │   └── AuthContext.tsx
 │   │
-│   └── types/                          ← TypeScript type definitions
-│       ├── auth.ts                     ← AuthUser, LoginRequest, RegisterRequest
-│       ├── report.ts                   ← Report, ReportStatus, ReportPriority, ReportFilters
-│       ├── category.ts                 ← Kategori
-│       ├── notification.ts             ← Notifikasi
-│       ├── analytics.ts                ← Data analitik
-│       ├── user.ts                     ← User (admin view)
-│       └── index.ts                    ← Barrel export semua types
+│   └── types/
+│       ├── auth.ts
+│       ├── report.ts
+│       ├── category.ts
+│       ├── notification.ts
+│       ├── analytics.ts
+│       ├── user.ts
+│       └── index.ts
 │
-├── .env.local                          ← Environment variables (JANGAN di-commit ke Git!)
-├── next.config.js                      ← Konfigurasi Next.js
-├── tailwind.config.js                  ← Konfigurasi warna & tema Tailwind CSS
-├── tsconfig.json                       ← Konfigurasi TypeScript
-└── package.json                        ← Daftar dependensi & scripts npm
+├── .env.local
+├── next.config.js
+├── tailwind.config.js
+├── tsconfig.json
+└── package.json
 ```
 
 ---
