@@ -88,6 +88,7 @@ Route::middleware('auth:api')->group(function () {
     // --- ADMIN ---
     Route::prefix('admin')->group(function () {
         Route::get('/users', [AdminController::class, 'users']);
+        Route::get('/users/{id}', [AdminController::class, 'showUser']);
         Route::post('/broadcast', [BroadcastController::class, 'send']);               // ← baru
     });
 

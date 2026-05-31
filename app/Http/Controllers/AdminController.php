@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse;
 
 class AdminController extends Controller
 {
@@ -93,6 +94,28 @@ class AdminController extends Controller
                     'halaman_ini'   => $halaman,
                     'total_halaman' => $totalHalaman,
                 ],
+            ],
+        ]);
+    }
+
+    public function showUser(string $id): JsonResponse
+    {
+        $user = User::with(['role'])
+            ->withCount('reports')
+            ->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id'            => $user->id,
+                'nama'          => $user->nama,
+                'email'         => $user->email,
+                'no_telp'       => $user->no_telp,
+                'foto'          => $user->foto,
+                'role'          => strtolower($user->role->name),
+                'is_active'     => (bool) $user->is_active,
+                'total_laporan' => $user->reports_count,
+                'bergabung_pada'=> $user->created_at->translatedFormat('d M Y'),
             ],
         ]);
     }
