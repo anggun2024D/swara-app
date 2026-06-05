@@ -27,7 +27,7 @@ export default function KategoriPage() {
           "
         >
           {isLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
@@ -36,7 +36,7 @@ export default function KategoriPage() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-3 gap-6">
               {kategori.map((cat, idx) => (
                 <KategoriCard key={cat.id} kategori={cat} index={idx} />
               ))}

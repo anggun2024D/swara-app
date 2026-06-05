@@ -4,11 +4,11 @@ import { MapPin, Mail, Phone, Facebook, Twitter, Instagram, Github, ExternalLink
 import Link from 'next/link'
  
 const quickLinks = [
-  { label: 'Buat Laporan', href: '/laporan' },
+  { label: 'Peta Ekonomi', href: '/economic-map' },
+  { label: 'Peluang', href: '/opportunities' },
   { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Peta Monitoring', href: '#map' },
-  { label: 'Statistik Publik', href: '#analytics' },
-  { label: 'Fitur SWARA', href: '#features' },
+  { label: 'Insights', href: '/economic-insights' },
+  { label: 'Fitur Platform', href: '#features' },
 ]
  
 const legalLinks = [
@@ -47,11 +47,11 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="font-extrabold text-xl text-primary leading-none" style={{fontFamily:'Plus Jakarta Sans,sans-serif'}}>SWARA</p>
-                  <p className="text-primary/50 text-[10px] tracking-widest uppercase font-medium">Kabupaten Lamongan</p>
+                  <p className="text-primary/50 text-[10px] tracking-widest uppercase font-medium">Economic Geospatial Platform</p>
                 </div>
               </div>
               <p className="text-primary/60 text-sm leading-relaxed mb-5">
-                Platform pelaporan infrastruktur berbasis GIS untuk mewujudkan Kabupaten Lamongan yang lebih baik dan transparan.
+                Platform pemetaan potensi ekonomi berbasis GIS — menghubungkan UMKM, pertanian, perikanan, dan pariwisata dengan investor dan mitra bisnis.
               </p>
               <div className="flex gap-2">
                 {[Facebook, Twitter, Instagram, Github].map((Icon, i) => (
@@ -103,18 +103,18 @@ export default function Footer() {
               <ul className="space-y-3">
                 <li className="flex items-start gap-2.5">
                   <MapPin size={14} className="text-gold mt-0.5 flex-shrink-0" />
-                  <span className="text-primary/60 text-sm">Jl. Pemuda No. 1, Lamongan, Jawa Timur</span>
+                  <span className="text-primary/60 text-sm">Jl. Mastrip No.61, Lamongan, Jawa Timur</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Mail size={14} className="text-gold flex-shrink-0" />
-                  <a href="mailto:info@swara.lamongan.go.id" className="text-primary/60 hover:text-primary text-sm transition-colors">
-                    info@swara.lamongan.go.id
+                  <a href="mailto:swara@lamongan.go.id" className="text-primary/60 hover:text-primary text-sm transition-colors">
+                    swara@lamongan.go.id
                   </a>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Phone size={14} className="text-gold flex-shrink-0" />
-                  <a href="tel:+0322123456" className="text-primary/60 hover:text-primary text-sm transition-colors">
-                    (0322) 123-456
+                  <a href="tel:+0322321170" className="text-primary/60 hover:text-primary text-sm transition-colors">
+                    (0322)321170
                   </a>
                 </li>
               </ul>
@@ -124,8 +124,8 @@ export default function Footer() {
           {/* Bottom bar */}
           <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-primary/40 text-xs text-center md:text-left">
-              © {new Date().getFullYear()} SWARA — Suara Warga untuk Ruang dan Aset.
-              <br className="md:hidden" /> Hak cipta dilindungi undang-undang.
+              © {new Date().getFullYear()} SWARA — Smart Wealth & Resource Alliance.
+              <br className="md:hidden" /> Memetakan Potensi, Menghubungkan Peluang.
             </p>
           </div>
         </div>

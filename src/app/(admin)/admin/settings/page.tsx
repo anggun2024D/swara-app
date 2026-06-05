@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { Save, Globe, Bell, Map, Shield, Layers } from 'lucide-react'
 
 export default function SettingsPage() {
-  const [general, setGeneral] = useState({ name: 'SWARA', logo: '', desc: 'Platform pelaporan infrastruktur' })
+  const [general, setGeneral] = useState({ name: 'SWARA', logo: '', desc: 'Platform Geospasial Ekonomi Daerah' })
   const [notif, setNotif] = useState({ email: true, wa: false, push: true })
 
   return (

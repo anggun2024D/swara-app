@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 import api from '@/services/api'
 import { useKategori } from '@/hooks/useKategori'
-import RiwayatCard from '@/components/riwayat/RiwayatCard'
 import EmptyState from '@/components/ui/EmptyState'
-import type { Report } from '@/types'
+import type { EconomicResource } from '@/types/resource'
 
 export default function KategoriDetailPage() {
   const { id } = useParams()
@@ -17,19 +17,19 @@ export default function KategoriDetailPage() {
   const { kategori, isLoading: loadingKat } = useKategori()
   const category = kategori.find(c => c.id === Number(id))
 
-  const [reports, setReports]     = useState<Report[]>([])
+  const [resources, setResources] = useState<EconomicResource[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (!id) return
     setIsLoading(true)
     api
-      .get('/laporan', { params: { category_id: id, per_halaman: 'all' } })
+      .get('/resources', { params: { category_id: id, per_halaman: 'all' } })
       .then(res => {
-        const laporan = res.data?.data?.laporan ?? []
-        setReports(laporan)
+        const data = res.data?.data?.resources ?? []
+        setResources(data)
       })
-      .catch(() => setReports([]))
+      .catch(() => setResources([]))
       .finally(() => setIsLoading(false))
   }, [id])
 
@@ -53,12 +53,14 @@ export default function KategoriDetailPage() {
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <div className="mb-6">
-          <h1 className="text-2xl font-extrabold text-text">
-            Laporan: {category?.nama ?? '...'}
-          </h1>
-          <p className="text-muted text-sm">
-            {isLoading ? 'Memuat...' : `Total ${reports.length} laporan`}
-          </p>
+          <div className="bg-primary border rounded-2xl p-8 shadow-sm">
+            <h1 className="text-2xl font-extrabold text-white">
+              Potensi: {category?.nama ?? '...'}
+            </h1>
+            <p className="text-gold text-sm mt-1">
+              {isLoading ? 'Memuat...' : `Total ${resources.length} potensi ekonomi`}
+            </p>
+          </div>
         </div>
 
         {isLoading ? (
@@ -67,15 +69,36 @@ export default function KategoriDetailPage() {
               <div key={i} className="h-24 rounded-2xl bg-gray-100 animate-pulse" />
             ))}
           </div>
-        ) : reports.length === 0 ? (
+        ) : resources.length === 0 ? (
           <EmptyState
-            title="Belum ada laporan"
-            description="Belum ada laporan untuk kategori ini"
+            title="Belum ada potensi"
+            description="Belum ada potensi ekonomi untuk kategori ini"
           />
         ) : (
           <div className="space-y-3">
-            {reports.map(report => (
-              <RiwayatCard key={report.id} report={report} />
+            {resources.map(r => (
+              <Link key={r.id} href={`/resources/${r.id}`}>
+                <div className="bg-white border border-border rounded-xl p-4 hover:shadow-md transition-all cursor-pointer">
+                  <div className="flex items-start gap-4">
+                    {r.images?.[0] ? (
+                      <img src={r.images[0].url} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-lg flex items-center justify-center text-2xl bg-gray-100">
+                        {r.category?.icon || '📋'}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-text truncate">{r.resource_name}</h3>
+                      <p className="text-muted text-sm mt-0.5 line-clamp-1">{r.description}</p>
+                      <div className="flex items-center gap-3 mt-2 text-xs text-muted">
+                        <span className="capitalize">📏 {r.business_scale}</span>
+                        <span>⭐ {r.verification_score}</span>
+                        <span>📍 {r.lokasi?.city || r.lokasi?.province || '-'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         )}

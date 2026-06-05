@@ -5,10 +5,11 @@ import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   LayoutDashboard,
-  FileText,
-  MapPin,
-  FolderTree,
-  History,
+  PlusCircle,
+  Briefcase,
+  Share2,
+  Bookmark,
+  BarChart3,
   User,
   LogOut,
   ArrowLeft,
@@ -24,10 +25,11 @@ interface SidebarProps {
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Buat Laporan', href: '/laporan', icon: FileText },
-  { name: 'Peta Wilayah', href: '/peta', icon: MapPin },
-  { name: 'Kategori', href: '/kategori', icon: FolderTree },
-  { name: 'Riwayat', href: '/riwayat', icon: History },
+  { name: 'Tambah Potensi', href: '/potensi/baru', icon: PlusCircle },
+  { name: 'Potensi Saya', href: '/potensi', icon: Briefcase },
+  { name: 'Kolaborasi', href: '/kolaborasi', icon: Share2 },
+  { name: 'Peluang Tersimpan', href: '/peluang-tersimpan', icon: Bookmark },
+  { name: 'Economic Insights', href: '/economic-insights', icon: BarChart3 },
   { name: 'Profil', href: '/profil', icon: User },
 ]
 
@@ -61,7 +63,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       >
         <div className="w-12 h-12 flex items-center justify-center">
           <Image
-            src="/logo.png"
+            src="/Mask group.png"
             alt="SWARA Logo"
             width={30}
             height={30}
@@ -75,7 +77,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             exit={{ opacity: 0 }}
             className="font-extrabold text-[25px] text-primary tracking-wide flex items-center"
           >
-            WARA
+            SWARA
           </motion.span>
         )}
       </div>
@@ -130,12 +132,12 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         {isOpen && user && (
           <div className="mb-3 px-2 py-1">
             <p className="text-xs text-muted">Logged in as</p>
-            <p className="text-sm font-semibold text-text truncate">{user.name}</p>
+            <p className="text-sm font-semibold text-primary truncate">{user.name}</p>
           </div>
         )}
         <button
           onClick={logout}
-          className="w-full flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 rounded-lg py-2 transition-colors"
+          className="w-full flex items-center border-red justify-center gap-2 text-red-600 bg-red-50 rounded-lg py-2"
         >
           <LogOut size={18} />
           {isOpen && <span className="text-sm font-medium">Logout</span>}

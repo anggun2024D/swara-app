@@ -1,69 +1,44 @@
 'use client'
- 
+
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Trash2, Route, Building2, Leaf, Users, Shield, Folder, ArrowRight } from 'lucide-react'
- 
-// ✅ INTERFACE & LOGIC TIDAK BERUBAH
-interface Kategori { id: number; nama: string; icon_url?: string | null }
-interface CategoryStat { name: string; count: number; percentage: number }
- 
-const ICON_MAP: Record<string, React.ElementType> = {
-  'sampah': Trash2, 'jalan': Route, 'fasilitas umum': Building2,
-  'lingkungan': Leaf, 'pelayanan publik': Users, 'keamanan': Shield,
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
+
+interface Category {
+  id: number
+  name: string
+  slug: string
+  icon: string
+  color: string
+  description?: string
+  resources_count?: number
 }
-const GRADIENT_MAP: Record<string, string> = {
-  'sampah': 'from-green-400 to-emerald-600',
-  'jalan': 'from-primary to-emerald-700',
-  'fasilitas umum': 'from-purple-400 to-purple-600',
-  'lingkungan': 'from-emerald-400 to-teal-600',
-  'pelayanan publik': 'from-blue-400 to-blue-600',
-  'keamanan': 'from-red-400 to-red-600',
-}
- 
-function getIcon(nama: string): React.ElementType {
-  const lower = nama.toLowerCase()
-  for (const [key, Icon] of Object.entries(ICON_MAP)) {
-    if (lower.includes(key)) return Icon
-  }
-  return Folder
-}
-function getGradient(nama: string): string {
-  const lower = nama.toLowerCase()
-  for (const [key, g] of Object.entries(GRADIENT_MAP)) {
-    if (lower.includes(key)) return g
-  }
-  return 'from-gray-400 to-gray-600'
-}
- 
+
 export default function CategorySection() {
-  // ✅ FETCH LOGIC TIDAK BERUBAH
-  const [kategori, setKategori] = useState<Kategori[]>([])
-  const [statMap, setStatMap] = useState<Record<string, number>>({})
+  const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(true)
- 
+
   useEffect(() => {
     const BASE = process.env.NEXT_PUBLIC_API_URL
     fetch(`${BASE}/kategori`)
       .then(r => r.json())
-      .then(json => { if (json.success) setKategori(json.data) })
+      .then(json => {
+        if (json.success) setCategories(json.data)
+      })
       .catch(console.error)
       .finally(() => setIsLoading(false))
- 
-    fetch(`${BASE}/stats`)
-      .then(r => r.json())
-      .then(json => {
-        if (json.success) {
-          const map: Record<string, number> = {}
-          for (const cat of (json.data.category_breakdown as CategoryStat[])) map[cat.name] = cat.count
-          setStatMap(map)
-        }
-      })
-      .catch(() => {})
   }, [])
- 
-  const items = isLoading ? Array.from({ length: 6 }, (_, i) => ({ id: i, nama: '', icon_url: null })) : kategori
- 
+
+  const fallbackCategories: Category[] = [
+    { id: 1, name: 'UMKM & Industri Kreatif', slug: 'umkm', icon: '🏭', color: '#F59E0B', description: 'Usaha Mikro, Kecil, Menengah dan industri kreatif lokal' },
+    { id: 2, name: 'Pertanian & Pangan', slug: 'pertanian', icon: '🌾', color: '#10B981', description: 'Sektor pertanian, perkebunan, dan ketahanan pangan' },
+    { id: 3, name: 'Perikanan & Peternakan', slug: 'perikanan', icon: '🐟', color: '#3B82F6', description: 'Sektor perikanan, budidaya, dan peternakan' },
+    { id: 4, name: 'Pariwisata & Ekonomi Lokal', slug: 'pariwisata', icon: '🏝️', color: '#8B5CF6', description: 'Sektor pariwisata, ekonomi kreatif, dan budaya lokal' },
+  ]
+
+  const items = categories.length > 0 ? categories : fallbackCategories
+
   return (
     <section id="categories" className="py-24 bg-primary relative overflow-hidden">
       {/* Background decoration */}
@@ -71,14 +46,14 @@ export default function CategorySection() {
         <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-white blur-3xl" />
         <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-gold blur-3xl" />
       </div>
- 
+
       {/* Wave top */}
       <div className="absolute top-0 left-0 right-0">
         <svg viewBox="0 0 1440 80" fill="none" className="w-full" preserveAspectRatio="none">
-          <path d="M0,0 C480,80 960,80 1440,0 L1440,0 L0,0 Z" fill="#ffffff"/>
+          <path d="M0,0 C480,80 960,80 1440,0 L1440,0 L0,0 Z" fill="#f5f7f9"/>
         </svg>
       </div>
- 
+
       <div className="container-premium relative z-10 mt-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -87,66 +62,65 @@ export default function CategorySection() {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <p className="text-gold font-semibold text-sm uppercase tracking-widest mb-2">Layanan Publik</p>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold max-w-3xl mx-auto leading-tight mb-6" style={{fontFamily:'Plus Jakarta Sans, sans-serif'}}>Kategori Laporan</h2>
-          <p className="text-white/60 mt-4 max-w-xl mx-auto">
-            Pilih kategori yang tepat untuk penanganan cepat dan tepat sasaran
+          <p className="text-gold font-semibold text-sm uppercase tracking-widest mb-2">Sektor Ekonomi</p>
+          <h2
+            className="text-4xl md:text-5xl font-extrabold max-w-3xl mx-auto leading-tight mb-4 text-white"
+            style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}
+          >
+            4 Sektor Unggulan
+          </h2>
+          <p className="text-white/60 mt-2 max-w-xl mx-auto">
+            Jelajahi potensi ekonomi Indonesia berdasarkan sektor strategis
           </p>
         </motion.div>
- 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {items.map((cat, idx) => {
-            if (isLoading) {
-              return (
-                <div key={idx} className="rounded-3xl bg-white/10 p-6 text-center animate-pulse">
-                  <div className="w-14 h-14 mx-auto rounded-2xl bg-white/20 mb-4" />
-                  <div className="h-3 bg-white/20 rounded mx-auto w-3/4 mb-2" />
-                  <div className="h-2 bg-white/10 rounded mx-auto w-1/2" />
-                </div>
-              )
-            }
- 
-            const Icon = getIcon(cat.nama)
-            const gradient = getGradient(cat.nama)
-            const hasImg = cat.icon_url?.startsWith('http')
-            const count = statMap[cat.nama] ?? 0
- 
-            return (
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-3xl bg-white/10 p-8 text-center animate-pulse">
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-white/20 mb-4" />
+                <div className="h-4 bg-white/20 rounded mx-auto w-3/4 mb-3" />
+                <div className="h-3 bg-white/10 rounded mx-auto w-2/3" />
+              </div>
+            ))
+          ) : (
+            items.map((cat, idx) => (
               <motion.div
                 key={cat.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.06 }}
+                transition={{ delay: idx * 0.1 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -6, scale: 1.02 }}
-                className="rounded-3xl bg-white/10 backdrop-blur-sm border border-white/15 p-5 text-center cursor-pointer group hover:bg-white/20 transition-all duration-300"
+                whileHover={{ y: -8, scale: 1.02 }}
               >
-                <div className={`w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-4 shadow-lg overflow-hidden group-hover:scale-110 transition-transform duration-300`}>
-                  {hasImg ? (
-                    <img src={cat.icon_url!} alt={cat.nama} className="w-8 h-8 object-contain" />
-                  ) : (
-                    <Icon className="w-6 h-6 text-white" />
+                <Link
+                  href={`/opportunities?category=${cat.slug}`}
+                  className="block rounded-3xl bg-white/10 backdrop-blur-sm border border-white/15 p-7 text-center cursor-pointer group hover:bg-white/20 transition-all duration-300"
+                >
+                  <div
+                    className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300"
+                    style={{ backgroundColor: `${cat.color}30` }}
+                  >
+                    <span className="text-3xl">{cat.icon}</span>
+                  </div>
+                  <h3 className="font-bold text-white text-base leading-tight">{cat.name}</h3>
+                  <p className="text-white/50 text-sm mt-2 line-clamp-2">{cat.description}</p>
+                  {cat.resources_count !== undefined && (
+                    <p className="mt-3 text-sm">
+                      <span className="font-bold text-gold">{cat.resources_count}</span>
+                      <span className="text-white/40 ml-1">potensi</span>
+                    </p>
                   )}
-                </div>
-                <h3 className="font-bold text-white text-sm leading-tight">{cat.nama}</h3>
-                <p className="text-white/50 text-xs mt-1.5">
-                  <span className="font-bold text-gold">{count}</span> laporan
-                </p>
+                  <div className="mt-4 flex items-center justify-center gap-1 text-gold text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    Jelajahi <ArrowRight size={14} />
+                  </div>
+                </Link>
               </motion.div>
-            )
-          })}
+            ))
+          )}
         </div>
- 
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          viewport={{ once: true }}
-          className="text-center mt-10"
-        >
-        </motion.div>
       </div>
- 
+
       {/* Wave bottom */}
       <div className="absolute bottom-0 left-0 right-0">
         <svg viewBox="0 0 1440 80" fill="none" className="w-full" preserveAspectRatio="none">

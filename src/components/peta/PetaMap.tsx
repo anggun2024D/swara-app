@@ -17,12 +17,12 @@ const statusColor: Record<string, string> = {
 
 // Icon kategori (emoji)
 const kategoriIcon: Record<string, string> = {
-  'jalan':      '🛣️',
-  'lampu':      '💡',
-  'drainase':   '🌊',
-  'sampah':     '🗑️',
-  'taman':      '🌳',
-  'default':    '📍',
+  'jalan':      '',
+  'lampu':      '',
+  'drainase':   '',
+  'sampah':     '',
+  'taman':      '',
+  'default':    '',
 }
 
 function getKategoriEmoji(nama: string): string {

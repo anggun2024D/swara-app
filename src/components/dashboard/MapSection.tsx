@@ -22,7 +22,7 @@ export default function MapSection() {
     >
       <div className="p-4 border-b border-border flex justify-between items-center">
         <div>
-          <h3 className="font-bold text-primary">Peta Sebaran Laporan</h3>
+          <h3 className="text-lg font-bold text-text mb-1">Peta Sebaran Laporan</h3>
           <p className="text-xs text-muted">
             {isLoading
               ? 'Memuat data…'

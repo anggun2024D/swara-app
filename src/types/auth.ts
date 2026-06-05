@@ -1,41 +1,66 @@
+// ══════════════════════════════════════════════════
+// SWARA Auth Types — Dynamic Role System
+// ══════════════════════════════════════════════════
+// Role dasar: user | admin (hanya 2)
+// Status dinamis: business_owner | investor (berdasarkan aktivitas)
+// Badge: community_contributor (reputasi)
+
+export interface Badge {
+  key: string
+  label: string
+  icon: string
+}
+
 export interface AuthUser {
-  id: string;            // ← UUID, bukan number
-  name: string;          // ← dari backend: kolom "nama" di-map jadi "name"
-  email: string;
-  role: 'user' | 'admin';
-  phone?: string;        // ← dari backend: kolom "no_telp" di-map jadi "phone"
-  avatar?: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  id: string
+  name: string
+  email: string
+  role: 'user' | 'admin'                // Hanya 2 role sistem
+  phone?: string
+  avatar?: string | null
+  bio?: string
+  organization?: string
+  website?: string
+  social_media?: Record<string, string>
+  is_active: boolean
+  // Dynamic statuses
+  is_investor: boolean
+  is_business_owner: boolean
+  is_community_contributor: boolean
+  active_statuses: string[]             // e.g. ['business_owner', 'investor']
+  badges: Badge[]
+  total_verifications_given: number
+  created_at: string
+  updated_at?: string
 }
 
 export interface LoginRequest {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 export interface RegisterRequest {
-  nama: string;                  // ← sesuai validasi backend ("nama", bukan "name")
-  email: string;
-  password: string;
-  password_confirmation: string;
+  nama: string
+  email: string
+  password: string
+  password_confirmation: string
+  // TIDAK ada pilihan role saat registrasi
 }
 
 export interface LoginResponse {
-  status: string;
-  message: string;
+  status: string
+  message: string
   data: {
-    token: string;
-    token_type: string;
-    expires_in: number;
-    user: AuthUser;
-  };
+    token: string
+    token_type: string
+    expires_in: number
+    user: AuthUser
+  }
 }
 
 export interface AuthState {
-  user: AuthUser | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
+  user: AuthUser | null
+  token: string | null
+  isAuthenticated: boolean
+  isLoading: boolean
 }

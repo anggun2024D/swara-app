@@ -1,57 +1,56 @@
 'use client'
- 
+
 import { motion } from 'framer-motion'
-import { MapPin, Clock, CheckCircle, TrendingUp, ArrowRight, Play } from 'lucide-react'
+import { MapPin, Users, CheckCircle, TrendingUp, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { usePublicStats } from '@/hooks/usePublicStats'
- 
+
 function formatNumber(value: number): string {
   return value.toLocaleString('id-ID')
 }
- 
+
 export default function HeroSection() {
-  // ✅ HOOK TIDAK BERUBAH
   const { stats, isLoading } = usePublicStats()
- 
+
   const statCards = [
     {
-      label: 'Total Laporan',
-      value: formatNumber(stats?.total ?? 0),
+      label: 'Total Potensi',
+      value: formatNumber(stats?.total_potensi ?? 0),
       icon: MapPin,
-      trend: `+${stats?.tersubmit ?? 0} baru`,
+      trend: 'terdata',
       color: 'text-emerald-400',
     },
     {
-      label: 'Selesai Ditangani',
-      value: formatNumber(stats?.selesai ?? 0),
+      label: 'Terverifikasi',
+      value: formatNumber(stats?.total_terverifikasi ?? 0),
       icon: CheckCircle,
-      trend: `${stats?.completion_rate ?? 0}% rate`,
+      trend: 'oleh komunitas',
       color: 'text-blue-400',
     },
     {
-      label: 'Sedang Diproses',
-      value: formatNumber(stats?.diproses ?? 0),
-      icon: Clock,
-      trend: 'aktif',
+      label: 'Pengguna Aktif',
+      value: formatNumber(stats?.total_pengguna ?? 0),
+      icon: Users,
+      trend: 'kontributor',
       color: 'text-amber-400',
     },
     {
-      label: 'Completion Rate',
-      value: `${stats?.completion_rate ?? 0}%`,
+      label: 'Kolaborasi',
+      value: formatNumber(stats?.total_kolaborasi ?? 0),
       icon: TrendingUp,
-      trend: 'laporan selesai',
+      trend: 'terjalin',
       color: 'text-rose-400',
     },
   ]
- 
+
   return (
     <section id="hero" className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background layers */}
       <div className="absolute inset-0 z-0">
         {/* Main image */}
         <img
-          src="https://www.nativeindonesia.com/foto/2024/07/masjid-namira-lamongan-jawa-timur.jpg"
-          alt="Kabupaten Lamongan"
+          src="/lamongan.png"
+          alt="Indonesia Economic Landscape"
           className="w-full h-full object-cover scale-105"
           style={{ filter: 'brightness(0.45) saturate(1.2)' }}
         />
@@ -71,18 +70,18 @@ export default function HeroSection() {
           className="absolute bottom-0 -left-32 w-[500px] h-[500px] rounded-full bg-gold/10 blur-3xl"
         />
       </div>
- 
+
       {/* Wave bottom divider */}
       <div className="absolute bottom-0 left-0 right-0 z-10">
         <svg viewBox="0 0 1440 100" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" className="w-full h-16 md:h-24">
           <path d="M0,50 C360,100 1080,0 1440,50 L1440,100 L0,100 Z" fill="#f5f7f9"/>
         </svg>
       </div>
- 
+
       {/* Content */}
       <div className="relative z-20 container-premium w-full pt-32 pb-24">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
- 
+        <div className="grid lg:grid-cols-[1fr_420px] gap-12 items-center">
+
           {/* LEFT — Text content */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
@@ -97,38 +96,39 @@ export default function HeroSection() {
               className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/25 rounded-full px-4 py-2 mb-6"
             >
               <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-              <span className="text-white/90 text-sm font-medium">Platform Aktif — Kabupaten Lamongan</span>
+              <span className="text-white/90 text-sm font-medium">Platform Aktif — Peta Ekonomi Indonesia</span>
             </motion.div>
- 
+
             {/* Heading */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.7 }}
-              className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white leading-[1.1] mb-6"
-              style={{fontFamily:'Plus Jakarta Sans, sans-serif'}}
+              className="text-5xl md:text-6xl lg:text-7xl xl:text-6xl font-extrabold text-white leading-[1.1] mb-6"
+              style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}
             >
-              Laporkan
+              Memetakan
               <br />
-              Infrastruktur{' '}
               <span className="text-gold relative inline-block">
-                Rusak
+                Potensi
                 <span className="absolute -bottom-1 left-0 right-0 h-1 bg-gold/50 rounded-full" />
               </span>
               <br />
-              Secara Real-Time
+              Menghubungkan
+              <br />
+              Peluang
             </motion.h1>
- 
+            
             {/* Subtitle */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45 }}
-              className="text-white/75 text-lg leading-relaxed max-w-lg mb-8"
+              className="text-white/75 text-[17px] leading-relaxed max-w-lg mb-8"
             >
-              SWARA menghubungkan masyarakat Kabupaten Lamongan dengan pemerintah melalui sistem pelaporan berbasis GPS dan peta interaktif secara transparan.
+              SWARA menghubungkan pelaku usaha, investor, dan komunitas melalui pemetaan potensi ekonomi berbasis GIS — UMKM, Pertanian, Perikanan, dan Pariwisata.
             </motion.p>
- 
+
             {/* CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -136,26 +136,26 @@ export default function HeroSection() {
               transition={{ delay: 0.6 }}
               className="flex flex-wrap gap-3"
             >
-              <Link href="/laporan">
+              <Link href="/economic-map">
                 <motion.button
                   whileHover={{ scale: 1.03, y: -2 }}
                   whileTap={{ scale: 0.97 }}
-                  className="flex items-center gap-2 px-7 py-3.5 bg-gold text-amber-950 font-bold rounded-2xl shadow-lg hover:bg-amber-400 transition-all text-base"
+                  className="flex items-center gap-2 px-9 py-4 bg-gold text-amber-950 font-bold rounded-2xl shadow-lg hover:bg-amber-400 transition-all text-base"
                 >
-                  Laporkan Sekarang <ArrowRight size={18} />
+                  🗺️ Jelajahi Peta <ArrowRight size={30} />
                 </motion.button>
               </Link>
-              <a href="#map">
+              <Link href="/opportunities">
                 <motion.button
                   whileHover={{ scale: 1.03, y: -2 }}
                   whileTap={{ scale: 0.97 }}
-                  className="flex items-center gap-2 px-7 py-3.5 bg-white/15 backdrop-blur-sm text-white font-semibold rounded-2xl border border-white/30 hover:bg-white/25 transition-all text-base"
+                  className="flex items-center gap-2 px-7 py-4 bg-white/15 backdrop-blur-sm border border-white/30 text-white font-bold rounded-2xl hover:bg-white/25 transition-all text-base"
                 >
-                  <Play size={16} fill="currentColor" /> Jelajahi Peta
+                  🌟 Lihat Peluang
                 </motion.button>
-              </a>
+              </Link>
             </motion.div>
- 
+
             {/* Trust indicators */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -164,9 +164,9 @@ export default function HeroSection() {
               className="flex items-center gap-6 mt-10 pt-8 border-t border-white/15"
             >
               {[
-                { label: '27 Kecamatan', sub: 'Tercakup' },
-                { label: '24/7', sub: 'Monitoring' },
-                { label: 'Real-time', sub: 'Update Status' },
+                { label: '4 Sektor', sub: 'Ekonomi' },
+                { label: 'Real-time', sub: 'Verifikasi' },
+                { label: 'Kolaborasi', sub: 'Langsung' },
               ].map((item, i) => (
                 <div key={i} className="text-center">
                   <p className="text-white font-bold text-lg leading-none">{item.label}</p>
@@ -175,9 +175,9 @@ export default function HeroSection() {
               ))}
             </motion.div>
           </motion.div>
- 
+
           {/* RIGHT — Floating analytics cards */}
-          <div className="hidden lg:flex flex-col gap-3 relative">
+          <div className="hidden lg:flex flex-col gap-3 relative ml-auto max-w-[400px]">
             {/* Main large card */}
             <motion.div
               initial={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -186,13 +186,13 @@ export default function HeroSection() {
               className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 p-6 shadow-float"
             >
               <div className="flex items-center justify-between mb-4">
-                <span className="text-white/80 text-sm font-medium">📊 Statistik Langsung</span>
+                <span className="text-white/80 text-sm font-medium">Statistik Ekonomi</span>
                 <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                   <span className="text-emerald-400 text-xs font-medium">LIVE</span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 {statCards.map((card, idx) => (
                   <motion.div
                     key={card.label}
@@ -218,7 +218,7 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
- 
+
       {/* Scroll indicator */}
       <motion.div
         animate={{ y: [0, 10, 0] }}

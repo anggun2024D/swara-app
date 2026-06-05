@@ -5,9 +5,19 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   CheckCircle, XCircle, MapPin, Camera,
   FileCheck, RefreshCw, AlertCircle,
-  ChevronLeft, ChevronRight, MessageSquare
+  ChevronLeft, ChevronRight, MessageSquare,
+  AlertTriangle,
 } from 'lucide-react'
 import { useVerification } from '@/hooks/useVerification'
+
+// ── Quick-pick templates ──────────────────────────────────────────────────────
+const REJECTION_TEMPLATES = [
+  'Foto tidak memperlihatkan kerusakan dengan jelas.',
+  'Lokasi laporan tidak valid atau tidak dapat diverifikasi.',
+  'Laporan duplikat dengan laporan yang sudah ada.',
+  'Informasi yang diberikan kurang lengkap.',
+  'Laporan tidak sesuai dengan kategori yang dipilih.',
+]
 
 export default function VerificationPage() {
   const {
@@ -18,15 +28,29 @@ export default function VerificationPage() {
 
   const [adminNotes, setAdminNotes] = useState('')
   const [activePhoto, setActivePhoto] = useState(0)
+  // Track apakah user mencoba submit tanpa mengisi alasan
+  const [touched, setTouched] = useState(false)
 
-  // Reset notes & photo saat laporan berganti
   const goTo = (idx: number) => {
     setCurrent(idx)
     setAdminNotes('')
     setActivePhoto(0)
+    setTouched(false)
   }
 
-  // ── Loading state ──
+  const onTolak = () => {
+    setTouched(true)
+    if (!adminNotes.trim() || adminNotes.trim().length < 10) return
+    handleVerify('ditolak', adminNotes)
+  }
+
+  const onProses = () => {
+    handleVerify('diproses', adminNotes || undefined)
+  }
+
+  const notesInvalid = touched && (!adminNotes.trim() || adminNotes.trim().length < 10)
+
+  // ── Loading ──
   if (isLoading) return (
     <div className="flex items-center justify-center h-96 bg-white rounded-2xl">
       <div className="flex items-center gap-2 text-muted">
@@ -36,7 +60,7 @@ export default function VerificationPage() {
     </div>
   )
 
-  // ── Empty state ──
+  // ── Empty ──
   if (!isLoading && total === 0) return (
     <div className="flex items-center justify-center h-96 bg-white rounded-2xl shadow-sm">
       <div className="text-center">
@@ -68,7 +92,7 @@ export default function VerificationPage() {
       {/* Error banner */}
       {error && (
         <div className="flex items-center gap-2 bg-red-50 text-red-600 border border-red-200 rounded-xl px-4 py-3 text-sm">
-          <AlertCircle size={16} />
+          <AlertCircle size={16} className="flex-shrink-0" />
           <span>{error}</span>
           <button onClick={refetch} className="ml-auto underline text-xs">Coba lagi</button>
         </div>
@@ -77,7 +101,7 @@ export default function VerificationPage() {
       {report && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-          {/* ── Panel kiri: Detail laporan ── */}
+          {/* ── Panel kiri ── */}
           <div className="bg-white rounded-2xl p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-lg">Detail Laporan</h2>
@@ -118,24 +142,83 @@ export default function VerificationPage() {
               </div>
             </div>
 
-            {/* Catatan admin */}
+            {/* ── Catatan / Alasan Penolakan ── */}
             <div>
-              <label className="text-xs text-muted mb-1 flex items-center gap-1">
-                <MessageSquare size={12} /> Catatan Admin (opsional)
+              <label className="text-xs text-muted mb-1.5 flex items-center gap-1">
+                <MessageSquare size={12} />
+                Alasan Penolakan
+                <span className="text-red-500 font-bold ml-0.5">*</span>
+                <span className="ml-auto text-gray-400 font-normal">wajib diisi jika menolak</span>
               </label>
+
+              {/* Quick templates */}
+              <div className="mb-3">
+                <select
+                  onChange={(e) => {
+                    if (!e.target.value) return
+                    setAdminNotes(e.target.value)
+                    setTouched(false)
+                  }}
+                  className="
+                    w-full
+                    text-sm
+                    border
+                    border-border
+                    rounded-xl
+                    px-3
+                    py-2.5
+                    bg-white
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-primary/30
+                    transition-all
+                  "
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    Pilih template alasan penolakan
+                  </option>
+
+                  {REJECTION_TEMPLATES.map((tpl) => (
+                    <option key={tpl} value={tpl}>
+                      {tpl}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <textarea
                 value={adminNotes}
-                onChange={e => setAdminNotes(e.target.value)}
-                placeholder="Tambahkan catatan untuk pelapor..."
+                onChange={e => { setAdminNotes(e.target.value); setTouched(false) }}
+                placeholder="Tuliskan alasan laporan ditolak secara spesifik..."
                 rows={3}
-                className="w-full text-sm border border-border rounded-xl px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className={`w-full text-sm border rounded-xl px-3 py-2 resize-none focus:outline-none focus:ring-2 transition ${
+                  notesInvalid
+                    ? 'border-red-400 focus:ring-red-300 bg-red-50'
+                    : 'border-border focus:ring-primary/30'
+                }`}
               />
+
+              <div className="flex items-center justify-between mt-1">
+                {notesInvalid ? (
+                  <p className="text-xs text-red-500 flex items-center gap-1">
+                    <AlertTriangle size={11} /> Alasan penolakan wajib diisi (min. 10 karakter)
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted">
+                    Berikan alasan yang jelas agar pengguna memahami penyebab laporan ditolak.
+                  </p>
+                )}
+                <span className={`text-xs ml-2 flex-shrink-0 ${adminNotes.length > 450 ? 'text-red-500' : 'text-muted'}`}>
+                  {adminNotes.length}/500
+                </span>
+              </div>
             </div>
 
             {/* Tombol aksi */}
             <div className="flex gap-3 pt-1">
               <button
-                onClick={() => handleVerify('diproses', adminNotes)}
+                onClick={onProses}
                 disabled={isSubmitting}
                 className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white py-2.5 rounded-xl flex items-center justify-center gap-2 transition font-medium"
               >
@@ -146,7 +229,7 @@ export default function VerificationPage() {
                 Valid — Proses
               </button>
               <button
-                onClick={() => handleVerify('ditolak', adminNotes)}
+                onClick={onTolak}
                 disabled={isSubmitting}
                 className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white py-2.5 rounded-xl flex items-center justify-center gap-2 transition font-medium"
               >
@@ -177,11 +260,10 @@ export default function VerificationPage() {
             </div>
           </div>
 
-          {/* ── Panel kanan: Foto laporan ── */}
+          {/* ── Panel kanan: Foto ── */}
           <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
             {report.foto.length > 0 ? (
               <div className="flex flex-col h-full">
-                {/* Main photo */}
                 <div className="relative flex-1 min-h-[360px] bg-gray-100">
                   <AnimatePresence mode="wait">
                     <motion.img
@@ -199,7 +281,6 @@ export default function VerificationPage() {
                     {activePhoto + 1} / {report.foto.length}
                   </div>
                 </div>
-                {/* Thumbnail strip */}
                 {report.foto.length > 1 && (
                   <div className="flex gap-2 p-3 border-t border-border overflow-x-auto">
                     {report.foto.map((f, idx) => (

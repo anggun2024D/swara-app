@@ -6,7 +6,10 @@ import QuickServicesSection from '@/components/landing/QuickServicesSection'
 import AnalyticsSection from '@/components/landing/AnalyticsSection'
 import GISMapSection from '@/components/landing/GISMapSection'
 import CategorySection from '@/components/landing/CategorySection'
+import FeaturesSection from '@/components/landing/FeaturesSection'
 import WorkflowSection from '@/components/landing/WorkflowSection'
+import TrustSection from '@/components/landing/TrustSection'
+import TestimoniSection from '@/components/landing/TestimoniSection'
 import MobilePreviewSection from '@/components/landing/MobilePreviewSection'
 import CTASection from '@/components/landing/CTASection'
 import Footer from '@/components/landing/Footer'
@@ -21,7 +24,10 @@ export default function LandingPage() {
         <AnalyticsSection />
         <GISMapSection />
         <CategorySection />
+        <FeaturesSection />
         <WorkflowSection />
+        <TrustSection />
+        <TestimoniSection />
         <MobilePreviewSection />
         <CTASection />
       </main>

@@ -1,34 +1,29 @@
 import { useState, useEffect, useCallback } from 'react';
 import { analyticsService } from '@/services/analytics.service';
 import { getErrorMessage } from '@/services/api';
-import type { AnalyticsData } from '@/types';
+import type { EconomicInsights } from '@/types/analytics';
 
-export function useAnalytics(
-  period: 'week' | 'month' | 'year' = 'month',
-  isAdmin = false
-) {
-  const [data, setData] = useState<AnalyticsData | null>(null);
+export function useAnalytics() {
+  const [data, setData] = useState<EconomicInsights | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetch = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = isAdmin
-        ? await analyticsService.getAdminAnalytics(period)
-        : await analyticsService.getAnalytics(period);
-      setData(res);
+      const res = await analyticsService.getDashboard();
+      setData(res.data?.data || null);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
-  }, [period, isAdmin]);
+  }, []);
 
   useEffect(() => {
-    fetch();
-  }, [fetch]);
+    fetchData();
+  }, [fetchData]);
 
-  return { data, isLoading, error, refetch: fetch };
+  return { data, isLoading, error, refetch: fetchData };
 }

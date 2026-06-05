@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import {
-  Trash2, Route, Building2, Leaf, Users, Shield, Folder
+  Trash2, Route, Building2, Leaf, Users, Shield, Folder,
+  Headphones
 } from 'lucide-react'
 import type { Kategori } from '@/hooks/useKategori'
 
@@ -13,17 +14,33 @@ const ICON_MAP: Record<string, React.ElementType> = {
   'jalan':            Route,
   'fasilitas umum':   Building2,
   'lingkungan':       Leaf,
-  'pelayanan publik': Users,
+  'pelayanan publik': Headphones,
   'keamanan':         Shield,
 }
+
+const IMAGE_MAP: Record<string, string> = {
+  'sampah':           '/sampah.jpeg',
+  'jalan':            '/jalanrusak.jpg',
+  'fasilitas umum':   '/fasilitasumum.webp',
+  'lingkungan':       '/lingkungan.jpeg',
+  'pelayanan publik': '/pelayananpublik.jpg',
+  'keamanan':         '/keamanan.jpeg',
+}
+
 
 function getIcon(nama: string): React.ElementType {
   const lower = nama.toLowerCase().trim()
   return ICON_MAP[lower] ?? Folder
 }
 
+function getImage(nama: string): string {
+  const lower = nama.toLowerCase().trim()
+  return IMAGE_MAP[lower] ?? "/default.png"
+}
+
 export default function KategoriCard({ kategori, index }: { kategori: Kategori; index: number }) {
-  const Icon = getIcon(kategori.nama)
+  const Icon  = getIcon(kategori.nama)
+  const image = getImage(kategori.nama)
 
   return (
     <Link href={`/kategori/${kategori.id}`}>
@@ -31,18 +48,31 @@ export default function KategoriCard({ kategori, index }: { kategori: Kategori; 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05 }}
-        whileHover={{ y: -5 }}
-        className="group relative flex flex-col items-center justify-center py-10 rounded-3xl transition-all duration-300 hover:bg-white hover:shadow-lg hover:-translate-y-1"
+        whileHover={{ y: -4, boxShadow: '0 12px 32px rgba(0,0,0,0.12)' }}
+        className="group relative flex flex-col items-center rounded-2xl bg-white shadow-md overflow-hidden transition-all duration-300 cursor-pointer"
       >
-        <div className="w-20 h-20 rounded-3xl bg-primary/5 border border-primary/10 flex items-center justify-center mb-5 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-white group-hover:scale-110">
-          <Icon size={32} />
+        {/* Gambar Ilustrasi Atas */}
+        <div className="w-full h-44 overflow-hidden">
+          <img
+            src={image}
+            alt={kategori.nama}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
         </div>
-        <h3 className="font-bold text-text text-xl tracking-tight text-center px-2">
-          {kategori.nama}
-        </h3>
-        <p className="text-sm text-muted mt-2 flex items-center justify-center gap-1 transition-colors group-hover:text-primary">
-          Lihat Detail <span className="text-xs">›</span>
-        </p>
+
+        {/* Icon Bulat — overlap antara gambar dan teks */}
+        <div className="relative w-full flex justify-center" style={{ marginTop: '-28px' }}>
+          <div className="w-14 h-14 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center text-gray-600 z-10">
+            <Icon size={24} />
+          </div>
+        </div>
+
+        {/* Nama Kategori */}
+        <div className="px-4 pb-5 pt-3 text-center">
+          <h3 className="font-semibold text-gray-800 text-base tracking-tight">
+            {kategori.nama}
+          </h3>
+        </div>
       </motion.div>
     </Link>
   )

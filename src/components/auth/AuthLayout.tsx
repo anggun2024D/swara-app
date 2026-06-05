@@ -8,9 +8,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="min-h-screen flex">
       {/* Left Section - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-primary via-primary-mid to-primary-dark overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-primary overflow-hidden">
         {/* Background decoration */}
-        <div className="absolute inset-0 bg-black/20"></div>
         <div className="absolute top-20 left-10 w-72 h-72 bg-gold/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
         
@@ -19,7 +18,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <Link href="/" className="flex items-center gap-1">
             <div className="relative w-14 h-14 flex-shrink-0">
               <Image
-                src="/logo.png"
+                src="/Mask group.png"
                 alt="SWARA Logo"
                 fill
                 priority

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import dynamic from 'next/dynamic'
-import { motion } from 'framer-motion'
-import { MapPin, Loader2, LocateFixed, ChevronDown, Search } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { MapPin, Loader2, LocateFixed, ChevronDown, Search, X } from 'lucide-react'
 import ImageUpload from './ImageUpload'
 import { useKategori } from '@/hooks/useKategori'
 
@@ -20,11 +20,28 @@ export interface LaporanFormData {
   judul:        string
   deskripsi:    string
   category_id:  string
-  priority:     string 
+  priority:     string
   address:      string
   latitude:     string
   longitude:    string
   is_confirmed: boolean
+}
+
+interface NominatimResult {
+  place_id:     number
+  display_name: string
+  lat:          string
+  lon:          string
+  address?: {
+    road?:            string
+    village?:         string
+    suburb?:          string
+    city_district?:   string
+    county?:          string
+    city?:            string
+    town?:            string
+    state?:           string
+  }
 }
 
 interface LaporanFormProps {
@@ -36,102 +53,206 @@ interface LaporanFormProps {
   isSubmitting:  boolean
 }
 
+// ─── Helper: highlight matched keyword in text ───────────────────────────────
+function HighlightText({ text, query }: { text: string; query: string }) {
+  if (!query.trim()) return <span>{text}</span>
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+  const parts = text.split(regex)
+  return (
+    <span>
+      {parts.map((part, i) =>
+        regex.test(part) ? (
+          <mark key={i} className="bg-primary/20 text-primary font-semibold rounded px-0.5">
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </span>
+  )
+}
+
+// ─── Helper: parse short label from Nominatim result ─────────────────────────
+function parseLabel(item: NominatimResult): { main: string; sub: string } {
+  const a = item.address ?? {}
+  const main =
+    a.road ??
+    a.village ??
+    a.suburb ??
+    a.city_district ??
+    item.display_name.split(',')[0].trim()
+
+  const sub = [
+    a.village ?? a.suburb ?? a.city_district ?? '',
+    a.city ?? a.town ?? a.county ?? 'Lamongan',
+  ]
+    .filter(Boolean)
+    .filter((v, i, arr) => arr.indexOf(v) === i)
+    .join(', ')
+
+  return { main: main.trim(), sub: sub.trim() }
+}
+
+// ─── Filter: only keep results that mention Lamongan ─────────────────────────
+function isInLamongan(item: NominatimResult): boolean {
+  const text = item.display_name.toLowerCase()
+  return text.includes('lamongan')
+}
+
 export default function LaporanForm({
   formData, setFormData,
   imageFiles, setImageFiles,
   onSubmit, isSubmitting,
 }: LaporanFormProps) {
   const { kategori, isLoading: loadingKategori } = useKategori()
-  const [locating, setLocating]     = useState(false)
-  const [geocoding, setGeocoding]   = useState(false)
-  const [geocodeError, setGeocodeError] = useState('')
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+  // ── Location state ────────────────────────────────────────────────────────
+  const [locating, setLocating]                   = useState(false)
+  const [addressQuery, setAddressQuery]           = useState(formData.address)
+  const [suggestions, setSuggestions]             = useState<NominatimResult[]>([])
+  const [showSuggestions, setShowSuggestions]     = useState(false)
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false)
+  const [noResults, setNoResults]                 = useState(false)
 
-  // Geocode via Nominatim (OpenStreetMap) — gratis, no API key
-  const geocodeAddress = useCallback(async (query: string) => {
-    if (!query || query.length < 5) return
-    setGeocoding(true)
-    setGeocodeError('')
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?` +
-        `q=${encodeURIComponent(query)}&format=json&limit=1&countrycodes=id`,
-        { headers: { 'Accept-Language': 'id' } }
-      )
-      const data = await res.json()
-      if (data.length > 0) {
-        setFormData({
-          ...formData,
-          address:   formData.address || data[0].display_name,
-          latitude:  data[0].lat,
-          longitude: data[0].lon,
-        })
-      } else {
-        setGeocodeError('Alamat tidak ditemukan di peta')
+  const debounceRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const wrapperRef    = useRef<HTMLDivElement>(null)
+  const inputRef      = useRef<HTMLInputElement>(null)
+
+  // ── Close dropdown on outside click ──────────────────────────────────────
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false)
       }
-    } catch {
-      setGeocodeError('Gagal mencari koordinat alamat')
-    } finally {
-      setGeocoding(false)
     }
-  }, [formData, setFormData])
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
-  // Debounce geocode saat user ketik di field address
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ── Fetch suggestions from Nominatim ─────────────────────────────────────
+  const searchAddress = useCallback(async (q: string) => {
+    if (!q || q.length < 3) {
+      setSuggestions([])
+      setShowSuggestions(false)
+      setNoResults(false)
+      return
+    }
+
+    setIsSearchingAddress(true)
+    setNoResults(false)
+
+    try {
+      const url =
+        `https://nominatim.openstreetmap.org/search?format=json` +
+        `&q=${encodeURIComponent(q + ', Lamongan, Jawa Timur, Indonesia')}` +
+        `&limit=7&addressdetails=1&countrycodes=id`
+
+      const res  = await fetch(url, { headers: { 'Accept-Language': 'id' } })
+      const data: NominatimResult[] = await res.json()
+
+      const filtered = data.filter(isInLamongan)
+
+      setSuggestions(filtered)
+      setShowSuggestions(filtered.length > 0 || true) // always show (empty state included)
+      setNoResults(filtered.length === 0)
+    } catch {
+      setSuggestions([])
+      setNoResults(true)
+    } finally {
+      setIsSearchingAddress(false)
+    }
+  }, [])
+
+  // ── Debounced input handler ───────────────────────────────────────────────
+  const handleAddressInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
+    setAddressQuery(val)
     setFormData({ ...formData, address: val })
-    setGeocodeError('')
+
+    if (!val) {
+      setSuggestions([])
+      setShowSuggestions(false)
+      setNoResults(false)
+      return
+    }
+
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => {
-      if (val.length >= 8) geocodeAddress(val + ', Lamongan')
-    }, 1000) // tunggu 1 detik setelah user berhenti mengetik
+    debounceRef.current = setTimeout(() => searchAddress(val), 650)
   }
 
+  // ── Select a suggestion ───────────────────────────────────────────────────
+  const handleSelect = (item: NominatimResult) => {
+    setFormData({
+      ...formData,
+      address:   item.display_name,
+      latitude:  item.lat,
+      longitude: item.lon,
+    })
+    setAddressQuery(item.display_name)
+    setShowSuggestions(false)
+    setSuggestions([])
+    inputRef.current?.blur()
+  }
+
+  // ── Clear address ─────────────────────────────────────────────────────────
+  const handleClear = () => {
+    setAddressQuery('')
+    setFormData({ ...formData, address: '', latitude: '', longitude: '' })
+    setSuggestions([])
+    setShowSuggestions(false)
+    setNoResults(false)
+    inputRef.current?.focus()
+  }
+
+  // ── GPS auto-locate ───────────────────────────────────────────────────────
   const handleAutoLocate = () => {
     if (!navigator.geolocation) return
     setLocating(true)
     navigator.geolocation.getCurrentPosition(
-      pos => {
-        setFormData({
-          ...formData,
-          latitude:  String(pos.coords.latitude),
-          longitude: String(pos.coords.longitude),
-          address:   formData.address ||
-            `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`,
-        })
-        setLocating(false)
+      async pos => {
+        const { latitude: lat, longitude: lon } = pos.coords
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+            { headers: { 'Accept-Language': 'id' } }
+          )
+          const data = await res.json()
+          const addr = data?.display_name ?? `${lat.toFixed(5)}, ${lon.toFixed(5)}`
+          setFormData({ ...formData, latitude: String(lat), longitude: String(lon), address: addr })
+          setAddressQuery(addr)
+        } catch {
+          const addr = `${lat.toFixed(5)}, ${lon.toFixed(5)}`
+          setFormData({ ...formData, latitude: String(lat), longitude: String(lon), address: addr })
+          setAddressQuery(addr)
+        } finally {
+          setLocating(false)
+        }
       },
       () => setLocating(false)
     )
   }
 
-  // Reverse geocode: koordinat → nama alamat
-  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
+  // ── Map click → reverse geocode ───────────────────────────────────────────
+  const handleMapClick = useCallback(async (lat: number, lng: number) => {
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?` +
-        `lat=${lat}&lon=${lng}&format=json`,
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
         { headers: { 'Accept-Language': 'id' } }
       )
       const data = await res.json()
-      if (data?.display_name) {
-        setFormData({ ...formData, latitude: String(lat), longitude: String(lng), address: data.display_name })
-      }
+      const addr = data?.display_name ?? `${lat.toFixed(5)}, ${lng.toFixed(5)}`
+      setFormData({ ...formData, latitude: String(lat), longitude: String(lng), address: addr })
+      setAddressQuery(addr)
     } catch {
-      // Gagal reverse geocode — koordinat tetap tersimpan, alamat tidak diupdate
       setFormData({ ...formData, latitude: String(lat), longitude: String(lng) })
     }
   }, [formData, setFormData])
 
-  // Update handleMapClick untuk pakai reverse geocode
-  const handleMapClick = (lat: number, lng: number) => {
-    reverseGeocode(lat, lng)
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
   const hasCoords = formData.latitude && formData.longitude
@@ -212,10 +333,10 @@ export default function LaporanForm({
         </label>
         <div className="grid grid-cols-4 gap-2">
           {[
-            { value: 'rendah',  label: 'Rendah',  color: 'text-green-700  bg-green-50  border-green-200  peer-checked:bg-green-500  peer-checked:border-green-500' },
-            { value: 'sedang',  label: 'Sedang',  color: 'text-blue-700   bg-blue-50   border-blue-200   peer-checked:bg-blue-500   peer-checked:border-blue-500' },
-            { value: 'tinggi',  label: 'Tinggi',  color: 'text-amber-700  bg-amber-50  border-amber-200  peer-checked:bg-amber-500  peer-checked:border-amber-500' },
-            { value: 'urgent',  label: 'Urgent',  color: 'text-red-700    bg-red-50    border-red-200    peer-checked:bg-red-500    peer-checked:border-red-500' },
+            { value: 'rendah', label: 'Rendah', color: 'text-green-700  bg-green-50  border-green-200  peer-checked:bg-green-500  peer-checked:border-green-500' },
+            { value: 'sedang', label: 'Sedang', color: 'text-blue-700   bg-blue-50   border-blue-200   peer-checked:bg-blue-500   peer-checked:border-blue-500' },
+            { value: 'tinggi', label: 'Tinggi', color: 'text-amber-700  bg-amber-50  border-amber-200  peer-checked:bg-amber-500  peer-checked:border-amber-500' },
+            { value: 'urgent', label: 'Urgent', color: 'text-red-700    bg-red-50    border-red-200    peer-checked:bg-red-500    peer-checked:border-red-500' },
           ].map(opt => (
             <label key={opt.value} className="cursor-pointer">
               <input
@@ -248,62 +369,154 @@ export default function LaporanForm({
         )}
       </div>
 
-      {/* Lokasi */}
+      {/* ── Lokasi ─────────────────────────────────────────────────────────── */}
       <div className="space-y-3">
         <label className="block text-sm font-semibold text-text">
           Lokasi Kejadian <span className="text-red-500">*</span>
         </label>
 
-        {/* Alamat + tombol cari + GPS */}
-        <div className="relative">
-          <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleAddressChange}
-            placeholder="Ketik alamat — peta akan otomatis bergerak..."
-            className="w-full pl-10 pr-20 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            required
-          />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
-            {/* Tombol cari manual */}
-            <button
-              type="button"
-              onClick={() => geocodeAddress(formData.address + ', Lamongan')}
-              disabled={geocoding || !formData.address}
-              title="Cari lokasi di peta"
-              className="p-1.5 rounded-lg hover:bg-primary/10 text-muted hover:text-primary transition disabled:opacity-50"
-            >
-              {geocoding
-                ? <Loader2 size={15} className="animate-spin" />
-                : <Search size={15} />
-              }
-            </button>
-            {/* Tombol GPS */}
-            <button
-              type="button"
-              onClick={handleAutoLocate}
-              disabled={locating}
-              title="Gunakan lokasi GPS saat ini"
-              className="p-1.5 rounded-lg hover:bg-primary/10 text-muted hover:text-primary transition disabled:opacity-50"
-            >
-              {locating
-                ? <Loader2 size={15} className="animate-spin" />
-                : <LocateFixed size={15} />
-              }
-            </button>
+        {/* Autocomplete input wrapper */}
+        <div ref={wrapperRef} className="relative">
+          {/* Input row */}
+          <div className="relative flex items-center">
+            <MapPin size={16} className="absolute left-3 text-muted pointer-events-none z-10" />
+
+            <input
+              ref={inputRef}
+              type="text"
+              name="address"
+              value={addressQuery}
+              onChange={handleAddressInput}
+              onFocus={() => {
+                if (suggestions.length > 0 || noResults) setShowSuggestions(true)
+              }}
+              placeholder="Ketik alamat untuk pencarian otomatis..."
+              autoComplete="off"
+              className="w-full pl-10 pr-20 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              required
+            />
+
+            {/* Right buttons */}
+            <div className="absolute right-2 flex items-center gap-1">
+              {/* Clear */}
+              {addressQuery && !isSearchingAddress && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  title="Hapus"
+                  className="p-1.5 rounded-lg hover:bg-red-50 text-muted hover:text-red-400 transition"
+                >
+                  <X size={14} />
+                </button>
+              )}
+
+              {/* Loading spinner or search icon */}
+              {isSearchingAddress ? (
+                <span className="p-1.5 text-primary">
+                  <Loader2 size={15} className="animate-spin" />
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => searchAddress(addressQuery)}
+                  disabled={!addressQuery}
+                  title="Cari lokasi"
+                  className="p-1.5 rounded-lg hover:bg-primary/10 text-muted hover:text-primary transition disabled:opacity-40"
+                >
+                  <Search size={15} />
+                </button>
+              )}
+
+              {/* GPS */}
+              <button
+                type="button"
+                onClick={handleAutoLocate}
+                disabled={locating}
+                title="Gunakan lokasi GPS"
+                className="p-1.5 rounded-lg hover:bg-primary/10 text-muted hover:text-primary transition disabled:opacity-40"
+              >
+                {locating
+                  ? <Loader2 size={15} className="animate-spin" />
+                  : <LocateFixed size={15} />
+                }
+              </button>
+            </div>
           </div>
+
+          {/* ── Dropdown ─────────────────────────────────────────────────── */}
+          <AnimatePresence>
+            {showSuggestions && (
+              <motion.div
+                key="suggestions"
+                initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                transition={{ duration: 0.15, ease: 'easeOut' }}
+                className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white border border-border rounded-2xl shadow-xl overflow-hidden"
+                style={{ maxHeight: '280px', overflowY: 'auto' }}
+              >
+                {/* Header badge */}
+                <div className="flex items-center justify-between px-3 py-2 bg-primary/5 border-b border-border/60">
+                  <span className="flex items-center gap-1.5 text-[10px] font-semibold text-primary uppercase tracking-wide">
+                    <MapPin size={10} />
+                    Hasil Pencarian — Lamongan
+                  </span>
+                  {isSearchingAddress && (
+                    <span className="text-[10px] text-muted flex items-center gap-1">
+                      <Loader2 size={9} className="animate-spin" /> Mencari...
+                    </span>
+                  )}
+                </div>
+
+                {/* Empty state */}
+                {noResults && !isSearchingAddress && (
+                  <div className="px-4 py-6 text-center">
+                    <MapPin size={20} className="mx-auto text-muted/40 mb-2" />
+                    <p className="text-sm text-muted font-medium">Alamat tidak ditemukan</p>
+                    <p className="text-xs text-muted/70 mt-0.5">
+                      Coba kata kunci lain atau pindahkan pin di peta
+                    </p>
+                  </div>
+                )}
+
+                {/* Suggestion items */}
+                {suggestions.map((item, idx) => {
+                  const { main, sub } = parseLabel(item)
+                  return (
+                    <motion.button
+                      key={item.place_id}
+                      type="button"
+                      initial={{ opacity: 0, x: -4 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.04 }}
+                      onClick={() => handleSelect(item)}
+                      className="w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-primary/5 active:bg-primary/10 transition-colors border-b border-border/40 last:border-0 group"
+                    >
+                      {/* Pin icon */}
+                      <div className="mt-0.5 flex-shrink-0 w-7 h-7 rounded-lg bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
+                        <MapPin size={13} className="text-primary" />
+                      </div>
+
+                      {/* Text */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-text truncate leading-tight">
+                          <HighlightText text={main} query={addressQuery} />
+                        </p>
+                        {sub && (
+                          <p className="text-xs text-muted mt-0.5 truncate">
+                            {sub}
+                          </p>
+                        )}
+                      </div>
+                    </motion.button>
+                  )
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* Error geocode */}
-        {geocodeError && (
-          <p className="text-xs text-red-500 flex items-center gap-1">
-            <span>⚠</span> {geocodeError}
-          </p>
-        )}
-
-        {/* Badge koordinat */}
+        {/* Koordinat badge */}
         {hasCoords && (
           <motion.div
             initial={{ opacity: 0, y: -4 }}
@@ -326,11 +539,6 @@ export default function LaporanForm({
                 Klik pada peta untuk pin lokasi yang tepat
               </span>
             </div>
-            {geocoding && (
-              <span className="text-xs text-primary flex items-center gap-1">
-                <Loader2 size={11} className="animate-spin" /> Mencari...
-              </span>
-            )}
           </div>
           <MiniMap
             lat={hasCoords ? parseFloat(formData.latitude) : -7.1195}
@@ -363,7 +571,7 @@ export default function LaporanForm({
         </div>
       </div>
 
-      {/* Checkbox konfirmasi — WAJIB sesuai backend is_confirmed:accepted */}
+      {/* Konfirmasi */}
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
         <label className="flex items-start gap-3 cursor-pointer">
           <div className="relative flex-shrink-0 mt-0.5">
@@ -417,6 +625,10 @@ export default function LaporanForm({
               judul: '', deskripsi: '', category_id: '', priority: '',
               address: '', latitude: '', longitude: '', is_confirmed: false,
             })
+            setAddressQuery('')
+            setSuggestions([])
+            setShowSuggestions(false)
+            setNoResults(false)
             setImageFiles([])
           }}
           className="h-12 px-6 rounded-2xl border border-border bg-white hover:bg-gray-50 text-text font-semibold text-sm transition-all duration-300"

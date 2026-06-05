@@ -79,16 +79,10 @@ export default function UpdatesPanel({ notifikasi, isLoading, belumDibaca }: Pro
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + idx * 0.08 }}
                 className={`card overflow-hidden hover:shadow-md transition-shadow
-                  ${!notif.is_read ? 'border-l-2 border-l-primary' : ''}`}
+                  ${!notif.is_read ? 'border-l-8 border-l-primary' : ''}`}
               >
                 {/* Top accent bar */}
-                <div
-                  className={`h-1 w-full ${
-                    color === 'blue'   ? 'bg-blue-400'   :
-                    color === 'green'  ? 'bg-green-400'  :
-                                        'bg-amber-400'
-                  }`}
-                />
+                
 
                 <div className="p-3">
                   {/* Badge tipe */}

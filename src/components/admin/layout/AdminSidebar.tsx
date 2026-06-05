@@ -21,7 +21,7 @@ import { useAuth } from '@/contexts/AuthContext'
 
 const menuItems = [
   { name: 'Dashboard',       href: '/admin/dashboard',       icon: LayoutDashboard },
-  { name: 'Laporan Masuk',   href: '/admin/reports',         icon: FileText        },
+  { name: 'Kelola Potensi',  href: '/admin/potensi',         icon: FileText        },
   { name: 'Peta Monitoring', href: '/admin/map-monitoring',  icon: Map             },
   { name: 'Analytics',       href: '/admin/analytics',       icon: BarChart3       },
   { name: 'Verifikasi',      href: '/admin/verification',    icon: CheckSquare     },
@@ -64,7 +64,7 @@ export default function AdminSidebar({
               exit={{ opacity: 0 }}
               className="font-extrabold text-[25px] text-white tracking-tight whitespace-nowrap leading-none"
             >
-              WARA
+              SWARA
             </motion.span>
           )}
         </div>

@@ -54,19 +54,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(
     async (credentials: LoginRequest) => {
       const res = await authService.login(credentials);
-
-      console.log('=== LOGIN RESPONSE ===', res);        // ← tambah
-      console.log('=== USER ===', res.data.user);        // ← tambah
-      console.log('=== ROLE ===', res.data.user.role);   // ← tambah
-
       setUser(res.data.user);
       await new Promise(resolve => setTimeout(resolve, 100)); 
-      // Role-based redirect
+      // Hanya 2 role: user atau admin
       if (res.data.user.role === 'admin') {
-        console.log('=== ADMIN LOGIN ===');
         router.push('/admin/dashboard');
       } else {
-        console.log('=== REDIRECT TO DASHBOARD ===');
         router.push('/dashboard');
       }
     },

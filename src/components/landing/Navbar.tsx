@@ -9,8 +9,8 @@ import Image from 'next/image'
 // ✅ SEMUA LOGIC AUTH TIDAK BERUBAH — hanya tampilan
 const navLinks = [
   { name: 'Beranda', href: '#hero' },
-  { name: 'Layanan', href: '#categories' },
-  { name: 'Peta', href: '#map' },
+  { name: 'Peta Ekonomi', href: '/economic-map' },
+  { name: 'Peluang', href: '/opportunities' },
   { name: 'Statistik', href: '#analytics' },
 ]
  
@@ -68,7 +68,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-1 group">
             <div className="relative w-12 h-12 flex-shrink-0">
               <Image
-                src="/logo.png"
+                src="/Mask group.png"
                 alt="SWARA Logo"
                 fill
                 priority
@@ -78,9 +78,9 @@ export default function Navbar() {
 
             <div>
               <span
-                className="font-extrabold text-3xl text-white leading-none block tracking-tight"
+                className="font-extrabold text-3xl text-primary leading-none block tracking-tight drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]"
               >
-                WARA
+                SWARA
               </span>
 
               <span
@@ -88,7 +88,7 @@ export default function Navbar() {
                   isScrolled ? 'text-muted' : 'text-white/70'
                 }`}
               >
-                Kabupaten Lamongan
+                Smart Wealth & Resource Alliance
               </span>
             </div>
           </Link>
@@ -112,7 +112,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-2">
             {isLoggedIn ? (
               <Link href={dashboardPath}>
-                <button className="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-hover transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5">
+                <button className="px-5 py-2.5 bg-gold text-amber-950 text-sm font-bold rounded-xl hover:bg-primary-hover transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5">
                   Dashboard 
                 </button>
               </Link>

@@ -8,32 +8,32 @@ import Link from 'next/link'
 
 const faqs = [
   {
-    q: 'Bagaimana cara membuat laporan?',
-    a: 'Klik menu "Buat Laporan" di sidebar, isi judul, deskripsi, pilih kategori dan lokasi, upload minimal 1 foto, lalu centang konfirmasi dan kirim.',
+    q: 'Bagaimana cara mendaftarkan potensi ekonomi?',
+    a: 'Klik menu "Tambah Potensi" di sidebar, isi nama usaha, deskripsi, pilih kategori sektor, lokasi, dan upload foto. Potensi Anda akan langsung aktif di peta ekonomi.',
   },
   {
-    q: 'Berapa lama laporan saya diproses?',
-    a: 'Laporan akan diverifikasi oleh admin dalam 1×24 jam. Setelah diverifikasi, tim lapangan akan menindaklanjuti sesuai prioritas dan antrean.',
+    q: 'Apa saja kategori sektor yang tersedia?',
+    a: 'SWARA memiliki 4 sektor utama: UMKM & Industri Kreatif, Pertanian & Pangan, Perikanan & Peternakan, dan Pariwisata & Ekonomi Lokal.',
   },
   {
-    q: 'Bisakah saya mengedit laporan yang sudah dikirim?',
-    a: 'Laporan hanya bisa diedit selama masih berstatus "Tersubmit". Setelah diverifikasi atau diproses, laporan tidak dapat diubah.',
+    q: 'Bisakah saya mengedit potensi yang sudah didaftarkan?',
+    a: 'Ya, Anda bisa mengedit potensi kapan saja melalui menu "Potensi Saya". Perubahan langsung berlaku tanpa perlu review ulang.',
   },
   {
-    q: 'Apa arti masing-masing status laporan?',
-    a: 'Tersubmit = menunggu verifikasi admin. Diverifikasi = sudah dicek admin. Diproses = tim lapangan sedang menangani. Selesai = masalah sudah diselesaikan. Ditolak = laporan tidak memenuhi syarat.',
+    q: 'Bagaimana sistem verifikasi komunitas bekerja?',
+    a: 'Level 1: Terdaftar (baru didaftarkan). Level 2: Terverifikasi Komunitas (mendapat dukungan dan review dari pengguna lain). Level 3: Mitra Terverifikasi (skor tinggi). Level 4: Resmi (verifikasi lengkap).',
   },
   {
-    q: 'Mengapa laporan saya ditolak?',
-    a: 'Laporan dapat ditolak jika: foto tidak jelas, lokasi tidak akurat, deskripsi tidak lengkap, atau laporan duplikat. Cek catatan admin di detail laporan untuk alasan spesifik.',
+    q: 'Bagaimana cara mengirim permintaan kolaborasi?',
+    a: 'Buka detail potensi yang menarik, lalu klik tombol "Ajukan Kolaborasi". Pilih jenis kolaborasi (Investasi, Distribusi, Supply, Kemitraan, atau Ekspansi) dan tulis pesan Anda.',
   },
   {
-    q: 'Bagaimana cara melacak perkembangan laporan?',
-    a: 'Buka menu "Riwayat Laporan" untuk melihat semua laporan beserta statusnya. Klik laporan untuk melihat detail dan catatan admin.',
+    q: 'Bagaimana cara menyimpan peluang yang menarik?',
+    a: 'Di halaman Papan Peluang atau detail potensi, klik ikon bookmark. Peluang tersimpan bisa dilihat di menu "Peluang Tersimpan".',
   },
   {
     q: 'Apakah data saya aman?',
-    a: 'Ya. Data pribadi Anda hanya digunakan untuk keperluan pelaporan dan tidak dibagikan kepada pihak ketiga. Foto laporan disimpan secara terenkripsi di cloud.',
+    a: 'Ya. Data pribadi Anda hanya digunakan untuk keperluan platform dan tidak dibagikan kepada pihak ketiga. Foto disimpan secara terenkripsi di cloud.',
   },
   {
     q: 'Bagaimana cara mengubah password?',
@@ -45,7 +45,7 @@ const contacts = [
   {
     icon: Phone,
     label: 'Telepon',
-    value: '(0322) 321-123',
+    value: '(0322)321170',
     sub: 'Senin–Jumat, 08.00–16.00',
     color: 'text-green-600 bg-green-50',
   },
@@ -88,7 +88,7 @@ export default function BantuanPage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
 
         {/* Hero */}
-        <div className="bg-gradient-to-r from-primary to-primary-mid rounded-2xl p-8 text-white">
+        <div className="bg-primary to-primary-mid rounded-2xl p-8 text-white">
           <div className="flex items-center gap-3 mb-2">
             <AlertCircle size={24} />
             <h1 className="text-2xl font-extrabold">Pusat Bantuan</h1>
@@ -187,26 +187,7 @@ export default function BantuanPage() {
           </div>
         </div>
 
-        {/* Quick links */}
-        <div className="card p-5 bg-primary-light border border-primary/20">
-          <p className="text-sm font-bold text-primary mb-3">Akses Cepat</p>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { label: 'Buat Laporan',    href: '/laporan' },
-              { label: 'Riwayat Laporan', href: '/riwayat' },
-              { label: 'Lihat Peta',      href: '/peta' },
-              { label: 'Edit Profil',     href: '/profil/edit' },
-            ].map(l => (
-              <Link
-                key={l.label}
-                href={l.href}
-                className="px-3 py-1.5 bg-white border border-primary/20 rounded-lg text-xs font-semibold text-primary hover:bg-primary hover:text-white transition-all"
-              >
-                {l.label}
-              </Link>
-            ))}
-          </div>
-        </div>
+        
 
       </motion.div>
     </div>

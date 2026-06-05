@@ -42,7 +42,7 @@ export default function HeroSection() {
       </div>
 
       <img
-        src="/lamongan.png"
+        src="/lamongan2.png"
         alt="Lamongan"
         className="absolute top-0 right-0 w-63 h-70 opacity-10"
       />
