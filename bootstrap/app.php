@@ -1,17 +1,7 @@
 <?php
-
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-
-if (getenv('RAILWAY_ENVIRONMENT') === 'production') {
-    try {
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
-    } catch (\Exception $e) {
-        // Silent fail
-    }
-}
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -21,8 +11,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Tambahkan ini agar unauthenticated request return JSON, bukan redirect
-        $middleware->redirectGuestsTo(fn() => null);
+        $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

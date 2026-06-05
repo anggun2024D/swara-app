@@ -2,87 +2,56 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ReportCategory;
+use App\Models\ResourceCategory;
 use Illuminate\Http\Request;
 
 class KategoriController extends Controller
 {
-    // Format response standar
-    private function response(
-        $success,
-        $message,
-        $data = null,
-        $code = 200
-    ) {
-        return response()->json([
-            'success' => $success,
-            'message' => $message,
-            'data'    => $data,
-        ], $code);
+    private function response($success, $message, $data = null, $code = 200)
+    {
+        return response()->json(['success' => $success, 'message' => $message, 'data' => $data], $code);
     }
 
-    // ================================
-    // 1. LIHAT SEMUA KATEGORI
-    // GET /api/kategori
-    // ================================
+    // ================================================================
+    // GET /api/kategori — Daftar Kategori Potensi Ekonomi
+    // ================================================================
     public function index()
     {
-        // Ambil semua kategori yang aktif saja
-        $kategori = ReportCategory::where('is_active', true)
-                                  ->get();
+        $categories = ResourceCategory::withCount('resources')
+            ->orderBy('id')
+            ->get()
+            ->map(fn($c) => [
+                'id'          => $c->id,
+                'name'        => $c->name,
+                'slug'        => $c->slug,
+                'icon'        => $c->icon,
+                'color'       => $c->color,
+                'description' => $c->description,
+                'total'       => $c->resources_count,
+            ]);
 
-        // Kalau tidak ada kategori sama sekali
-        if ($kategori->isEmpty()) {
-            return $this->response(
-                false,
-                'Belum ada kategori tersedia',
-                null,
-                404
-            );
-        }
-
-        return $this->response(
-            true,
-            'Daftar kategori berhasil dimuat',
-            $kategori->map(function ($item) {
-                return [
-                    'id'       => $item->id,
-                    'nama'     => $item->name,
-                    'icon_url' => $item->icon_url,
-                ];
-            })
-        );
+        return $this->response(true, 'Daftar kategori berhasil dimuat', $categories);
     }
 
-    // ================================
-    // 2. DETAIL KATEGORI
-    // GET /api/kategori/{id}
-    // ================================
-    public function show(string $id)
+    // ================================================================
+    // GET /api/kategori/{id} — Detail Kategori
+    // ================================================================
+    public function show(int $id)
     {
-        $kategori = ReportCategory::where('id', $id)
-                                  ->where('is_active', true)
-                                  ->first();
+        $category = ResourceCategory::withCount('resources')->find($id);
 
-        // Kalau kategori tidak ditemukan
-        if (!$kategori) {
-            return $this->response(
-                false,
-                'Kategori tidak ditemukan',
-                null,
-                404
-            );
+        if (!$category) {
+            return $this->response(false, 'Kategori tidak ditemukan', null, 404);
         }
 
-        return $this->response(
-            true,
-            'Detail kategori berhasil dimuat',
-            [
-                'id'            => $kategori->id,
-                'nama'          => $kategori->name,
-                'icon_url'      => $kategori->icon_url,
-                'jumlah_laporan'=> $kategori->reports()->count(),
-            ]
-        );
+        return $this->response(true, 'Detail kategori berhasil dimuat', [
+            'id'          => $category->id,
+            'name'        => $category->name,
+            'slug'        => $category->slug,
+            'icon'        => $category->icon,
+            'color'       => $category->color,
+            'description' => $category->description,
+            'total'       => $category->resources_count,
+        ]);
     }
 }

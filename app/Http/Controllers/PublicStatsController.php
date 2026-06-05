@@ -2,48 +2,54 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Report;
-use App\Models\ReportCategory;
-use Illuminate\Http\JsonResponse;
+use App\Models\EconomicResource;
+use App\Models\User;
+use App\Models\ResourceVerification;
+use App\Models\Collaboration;
+use Illuminate\Support\Facades\DB;
 
 class PublicStatsController extends Controller
 {
-    public function index(): JsonResponse
+    // ================================================================
+    // GET /api/stats — Statistik Publik Landing Page
+    // ================================================================
+    public function index()
     {
-        // Ambil semua laporan (tanpa auth), exclude soft deleted
-        $reports = Report::with('category')
-            ->whereNull('deleted_at')
+        $totalResources = EconomicResource::where('status', 'active')->count();
+        $totalUsers     = User::where('is_active', true)->count();
+        $totalVerified  = EconomicResource::where('status', 'active')
+                            ->where('community_verified', true)->count();
+        $totalCollabs   = Collaboration::where('status', 'accepted')->count();
+
+        // Per kategori
+        $byCategory = DB::table('economic_resources as er')
+            ->join('resource_categories as rc', 'er.category_id', '=', 'rc.id')
+            ->whereNull('er.deleted_at')
+            ->where('er.status', 'active')
+            ->select('rc.id', 'rc.name', 'rc.slug', 'rc.icon', 'rc.color', DB::raw('COUNT(*) as total'))
+            ->groupBy('rc.id', 'rc.name', 'rc.slug', 'rc.icon', 'rc.color')
             ->get();
 
-        $total     = $reports->count();
-        $selesai   = $reports->where('status', 'selesai')->count();
-        $diproses  = $reports->where('status', 'diproses')->count();
-        $tersubmit = $reports->where('status', 'tersubmit')->count();
-        $ditolak   = $reports->where('status', 'ditolak')->count();
-
-        // Breakdown per kategori
-        $categoryBreakdown = $reports
-            ->groupBy(fn($r) => $r->category?->name ?? 'Lainnya')
-            ->map(fn($group) => $group->count())
-            ->sortDesc()
-            ->take(5)
-            ->map(fn($count, $name) => [
-                'name'       => $name,
-                'count'      => $count,
-                'percentage' => $total > 0 ? round(($count / $total) * 100) : 0,
-            ])
-            ->values();
+        // Top 5 provinsi
+        $topProvinces = DB::table('economic_resources')
+            ->whereNull('deleted_at')
+            ->where('status', 'active')
+            ->whereNotNull('province')
+            ->select('province', DB::raw('COUNT(*) as total'))
+            ->groupBy('province')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
 
         return response()->json([
             'success' => true,
             'data'    => [
-                'total'              => $total,
-                'selesai'            => $selesai,
-                'diproses'           => $diproses,
-                'tersubmit'          => $tersubmit,
-                'ditolak'            => $ditolak,
-                'completion_rate'    => $total > 0 ? round(($selesai / $total) * 100) : 0,
-                'category_breakdown' => $categoryBreakdown,
+                'total_potensi'       => $totalResources,
+                'total_pengguna'      => $totalUsers,
+                'total_terverifikasi' => $totalVerified,
+                'total_kolaborasi'    => $totalCollabs,
+                'by_category'         => $byCategory,
+                'top_provinces'       => $topProvinces,
             ],
         ]);
     }

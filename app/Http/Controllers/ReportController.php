@@ -403,31 +403,66 @@ public function update(Request $request, string $id)
     // PUT /api/laporan/{id}/verifikasi
     // ================================
     public function verifikasi(Request $request, string $id)
-    {
-        $report = Report::find($id);
+{
+    $report = Report::find($id);
 
-        if (!$report) {
-            return $this->response(false, 'Laporan tidak ditemukan', null, 404);
-        }
-
-        $request->validate([
-            'status'       => 'required|in:diverifikasi,diproses,selesai,ditolak',
-            'admin_notes'  => 'nullable|string|max:500',
-        ]);
-
-        $report->update([
-            'status'      => $request->status,
-            'admin_notes' => $request->admin_notes,
-        ]);
-
-        $report->load(['user', 'category', 'images']);
-
-        return $this->response(
-            true,
-            'Status laporan berhasil diperbarui',
-            new ReportResource($report)
-        );
+    if (!$report) {
+        return $this->response(false, 'Laporan tidak ditemukan', null, 404);
     }
+
+    $request->validate([
+        'status'      => 'required|in:diverifikasi,diproses,selesai,ditolak',
+        'admin_notes' => 'required_if:status,ditolak|nullable|string|min:10|max:500',
+    ], [
+        'admin_notes.required_if' => 'Alasan penolakan wajib diisi minimal 10 karakter.',
+        'admin_notes.min'         => 'Alasan penolakan minimal 10 karakter.',
+    ]);
+
+    $report->update([
+        'status'      => $request->status,
+        'admin_notes' => $request->admin_notes,
+    ]);
+
+    $report->load(['user', 'category', 'images']);
+
+    // ── Notifikasi FCM ─────────────────────────────────────────
+    try {
+        $fcm  = new FCMService();
+        $user = $report->user;
+
+        if ($user?->fcm_token) {
+            if ($request->status === 'ditolak') {
+                $fcm->sendToToken(
+                    token: $user->fcm_token,
+                    title: '❌ Laporan Ditolak',
+                    body:  "Laporan \"{$report->judul}\" ditolak.\nAlasan: {$request->admin_notes}",
+                    data:  ['type' => 'laporan_ditolak', 'report_id' => (string) $report->id]
+                );
+            } else {
+                $labelMap = [
+                    'diverifikasi' => '✅ Laporan Diverifikasi',
+                    'diproses'     => '🔄 Laporan Sedang Diproses',
+                    'selesai'      => '🎉 Laporan Selesai',
+                ];
+                $fcm->sendToToken(
+                    token: $user->fcm_token,
+                    title: $labelMap[$request->status] ?? 'Status Laporan Diperbarui',
+                    body:  "Laporan \"{$report->judul}\" kini berstatus {$request->status}.",
+                    data:  ['type' => 'laporan_diperbarui', 'report_id' => (string) $report->id]
+                );
+            }
+        }
+    } catch (\Exception $fcmError) {
+        \Log::warning('FCM notification failed: ' . $fcmError->getMessage());
+    }
+    // ───────────────────────────────────────────────────────────
+
+    return $this->response(
+        true,
+        'Status laporan berhasil diperbarui',
+        new ReportResource($report)
+    );
+}
 
     /**
      * Data peta untuk landing page — publik, tanpa auth

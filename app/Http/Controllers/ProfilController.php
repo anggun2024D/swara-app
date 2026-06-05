@@ -196,4 +196,38 @@ class ProfilController extends Controller
             $this->formatUser($user)
         );
     }
+
+    // ================================
+    // 6. TOGGLE PROFIL INVESTOR
+    // PUT /api/profil/investor
+    // ================================
+    public function toggleInvestor()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $user->update([
+            'is_investor' => !$user->is_investor,
+        ]);
+
+        $status = $user->is_investor ? 'diaktifkan' : 'dinonaktifkan';
+
+        return $this->response(true, "Profil investor berhasil {$status}", [
+            'is_investor'     => (bool) $user->is_investor,
+            'active_statuses' => $user->getActiveStatuses(),
+            'badges'          => $user->getBadges(),
+        ]);
+    }
+
+    // ================================
+    // 7. PROFIL LENGKAP + STATUS DINAMIS
+    // GET /api/profil/full
+    // ================================
+    public function fullProfile()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        return $this->response(true, 'Profil lengkap berhasil dimuat', $user->getFullProfile());
+    }
 }

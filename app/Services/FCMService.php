@@ -100,6 +100,6 @@ class FCMService
         );
 
         $token = $credentials->fetchAuthToken();
-        return $token['access_url'];
+        return $token['access_token'];
     }
 }

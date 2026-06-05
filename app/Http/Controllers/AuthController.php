@@ -112,20 +112,31 @@ class AuthController extends Controller
     }
 
     // ─── FORMAT USER (konsisten ke frontend) ──────────────────────
+    // Hanya 2 role: user | admin
+    // Status dinamis: is_business_owner, is_investor, badges
     private function formatUser(User $user): array
     {
         return [
-            'id'     => $user->id,                      // UUID string
-            'name'   => $user->nama,                    // map nama → name
+            'id'     => $user->id,
+            'name'   => $user->nama,
             'email'  => $user->email,
-            'role'   => $user->role?->name ?? 'user',   // dari relasi
-            'phone'  => $user->no_telp,                 // map no_telp → phone
-            'avatar' => $user->foto
-                            ? asset('storage/' . $user->foto)
-                            : null,
-            'is_active'  => $user->is_active,
-            'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at,
+            'role'   => $user->getRoleName(),         // hanya 'user' atau 'admin'
+            'phone'  => $user->no_telp,
+            'avatar' => $user->foto,
+            'bio'             => $user->bio,
+            'organization'    => $user->organization,
+            'website'         => $user->website,
+            'social_media'    => $user->social_media,
+            'is_active'       => (bool) $user->is_active,
+            // Dynamic statuses
+            'is_investor'              => $user->isInvestor(),
+            'is_business_owner'        => $user->isBusinessOwner(),
+            'is_community_contributor' => $user->isCommunityContributor(),
+            'active_statuses'          => $user->getActiveStatuses(),
+            'badges'                   => $user->getBadges(),
+            'total_verifications_given' => $user->total_verifications_given ?? 0,
+            'created_at' => $user->created_at?->toISOString(),
+            'updated_at' => $user->updated_at?->toISOString(),
         ];
     }
 }
